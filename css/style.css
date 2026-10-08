@@ -265,3 +265,37 @@ button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visibl
     font-family: var(--hand);
     font-size: 1.15rem;
 }
+
+@media (max-width: 1180px) {
+    .buerau-shell { padding: 26px 28px 0; }
+}
+
+@media (max-width: 780px) {
+    .bureau-shell { padding: 20px 20px 0; }
+    .start-screen { padding: 15px 0 22px; }
+    .start-paper { padding: 24px 29px 22px; }
+}
+
+@media (max-width: 500px) {
+    .bureau-shell { padding: 17px 14px 0; }
+    .start-screen {
+        min-height: calc(100svh - 34px);
+        padding-top: 5px;
+    }
+    .start-paper { padding: 22px 21px 20px; }
+    .start-topline { font-size: .5625rem; gap: 10px; }
+    .start-topline > span:first-child { max-width: 70%; }
+    .start-eyebrow { font-size: .625rem; margin-top: 21px; }
+    .start-paper h1 {
+        font-size: clamp(3.3rem, 13.5vw, 4.2rem);
+        margin-top: 12px;
+    }
+    .start-tagline { font-size: 1.45rem; }
+    .start-intro { font-size: .8125rem; }
+    .start-bottomline {
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        margin-top: 20px;
+    }
+}
