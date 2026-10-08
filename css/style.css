@@ -1,12 +1,30 @@
 @charset "UTF-8";
 
+@font-face {
+    font-family: "Caveat";
+    src: url("../assets/fonts/Caveat-Variable.woff") format("woff");
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Special Elite";
+    src: url("../assets/fonts/SpecialElite-Regular.woff") format("woff");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   --desk: #294643;
   --paper: #fff4dc;
   --paper-bright: #fff9eb;
   --ink: #303d3b;
+  --mono: "Special Elite", "Courier New", Courier, monospace;
   --sans: Arial, Helvetica, sans-serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
 }
 
 * {
@@ -21,6 +39,8 @@ body {
   font-size: 1rem;
   line-height: 1.5;
 }
+
+h1 { font-family: var(--hand); }
 
 .bureau-shell {
   max-width: 1480px;
