@@ -1,19 +1,19 @@
 @charset "UTF-8";
 
 @font-face {
-    font-family: "Caveat";
-    src: url("../assets/fonts/Caveat-Variable.woff") format("woff");
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: swap;
+  font-family: "Caveat";
+  src: url("../assets/fonts/Caveat-Variable.woff") format("woff");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "Special Elite";
-    src: url("../assets/fonts/SpecialElite-Regular.woff") format("woff");
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
+  font-family: "Special Elite";
+  src: url("../assets/fonts/SpecialElite-Regular.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
 }
 
 :root {
@@ -22,10 +22,11 @@
   --desk: #294643;
   --paper: #fff4dc;
   --paper-bright: #fff9eb;
+  --paper-muted: #5e6c5e;
   --ink: #303d3b;
+  --red-ink: #a84432;
   --pen: #285674;
   --coral: #efa58f;
-  --red-ink: #a84432;
 
   --mono: "Special Elite", "Courier New", Courier, monospace;
   --sans: Arial, Helvetica, sans-serif;
@@ -45,22 +46,24 @@ body {
   line-height: 1.5;
 }
 
-h1 { 
-    font-family: var(--hand);
-    font-size: clamp(2.4rem, 3.5vw, 3.5rem);
-    font-weight: 600;
-    letter-spacing: -.02em;
-    line-height: 1.02;
+h1, h2, h3, p, blockquote { margin: 0; }
+
+h1 {
+  font-family: var(--hand);
+  font-size: clamp(2.4rem, 3.5vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
 }
 h1 em {
-    color: var(--coral);
-    font-style: normal;
-    display: inline-block;
-    transform: rotate(-2deg);
-    text-decoration: underline;
-    text-decoration-style: wavy;
-    text-decoration-thickness: 1.5px;
-    text-underline-offset: 6px;
+  color: var(--coral);
+  font-style: normal;
+  display: inline-block;
+  transform: rotate(-2deg);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 6px;
 }
 
 .bureau-shell {
@@ -91,28 +94,49 @@ h1 em {
   text-align: center;
 }
 .start-paper h1 {
-    color: var(--pen);
-    font-size: clamp(3.6rem, 7.3vw, 5.3rem);
-    line-height: .93;
-    margin: 13px 0 17px;
-    letter-spacing: -.035em;
+  color: var(--pen);
+  font-size: clamp(3.6rem, 7.3vw, 5.3rem);
+  line-height: 0.93;
+  margin: 13px 0 17px;
+  letter-spacing: -0.035em;
 }
 .start-paper h1 em {
-    color: var(--red-ink);
-    text-decoration: none;
+  color: var(--red-ink);
+  text-decoration: none;
+}
+
+.start-tagline {
+    font-family: var(--hand);
+    color: var(--pen);
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.start-intro {
+    font-size: .875rem;
+    line-height: 1.65;
+    color: var(--paper-muted);
+    margin-top: 12px;
 }
 
 .start-actions {
-    display: grid;
-    gap: 11px;
-    max-width: 345px;
-    margin: 24px auto 0;
+  display: grid;
+  gap: 11px;
+  max-width: 345px;
+  margin: 24px auto 0;
 }
 .start-actions .primary-button,
 .start-actions .secondary-button {
-    min-height: 50px;
-    font-size: 1.6rem;
+  min-height: 50px;
+  font-size: 1.6rem;
 }
-.start-actions .primary-button { transform: rotate(-.65deg); }
-.start-actions .secondary-button { transform: rotate(.45deg); }
-.start-actions button:disabled { cursor: not-allowed; }
+.start-actions .primary-button {
+  transform: rotate(-0.65deg);
+}
+.start-actions .secondary-button {
+  transform: rotate(0.45deg);
+}
+.start-actions button:disabled {
+  cursor: not-allowed;
+}
