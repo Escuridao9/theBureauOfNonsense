@@ -432,6 +432,7 @@ input:focus-visible {
     accent-color: var(--pen);
     margin: 0;
     flex-shrink: 0;
+    cursor: pointer;
 }
 
 .volume-heading {
