@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="bureau-shell">
-      <main id="game">
+      <main id="game" aria-busy="true">
         <section
           id="start-screen"
           class="start-screen"
@@ -36,7 +36,12 @@
                 <button id="honours-button" class="secondary-button" type="button" disabled>Roll of Honour</button>
                 <button id="settings-button" class="text-button" type="button">Settings</button>
             </nav>
+            <p id="loading-state" class="menu-status" role="status">Unlocking the filling cabinet...</p>
             <p id="campaign-status" class="menu-status" role="status" hidden></p>
+            <section id="error-state" class="menu-error" aria-label="Loading error" hidden>
+                <p id="error-message">The filing cabinet is stuck. Please try again.</p>
+                <button id="retry-button" class="secondary-button" type="button">Try again</button>
+            </section>
             <div class="start-bottomline">
                 <span>BEST NORMAL RUN <strong id="menu-best-score">-</strong></span>
                 <span>Every stamp leaves a paper trail.</span>

@@ -56,6 +56,10 @@ blockquote {
   margin: 0;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 h1 {
   font-family: var(--hand);
   font-size: clamp(2.4rem, 3.5vw, 3.5rem);
@@ -237,6 +241,28 @@ button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visibl
     padding: 7px 6px 3px;
 }
 .start-actions .text.button:hover { color: var(--red-ink); border-color: var(--red-ink); }
+
+.menu-status {
+    color: var(--paper-muted);
+    font-size: .75rem;
+    line-height: 1.6;
+    margin: 16px auto 0;
+    max-width: 370px;
+}
+
+.menu-error {
+    color: var(--red-ink);
+    font-size: .875rem;
+    line-height: 1.6;
+    padding: 12px;
+    border: 1px dashed var(--red-ink);
+    margin-top: 18px;
+}
+
+.menu-error .secondary-button {
+    font-size: 1.25rem;
+    margin-top: 12px;
+}
 
 .start-bottomline {
     display: flex;
