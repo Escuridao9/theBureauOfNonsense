@@ -28,6 +28,7 @@
   --pen: #285674;
   --coral: #efa58f;
   --gold: #f0d3a1;
+  --muted: #d0d9c1;
 
   --mono: "Special Elite", "Courier New", Courier, monospace;
   --sans: Arial, Helvetica, sans-serif;
@@ -73,6 +74,14 @@ h1 em {
   text-underline-offset: 6px;
 }
 
+button, input { font: inherit; }
+button {
+    cursor: pointer;
+    transition: background .15s, color .15s, transform .15s, box-shadow .15s;
+}
+button:disabled { opacity: .45; cursor: wait; }
+button:active:not(:disabled) { transform: translateY(2px); }
+
 button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible {
     outline: 3px solid var(--gold);
     outline-offset: 5px;
@@ -83,6 +92,19 @@ button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visibl
   margin: auto;
   padding: 28px 38px 0;
 }
+
+.text-button {
+    border: 0;
+    padding: 8px 0 5px;
+    background: transparent;
+    color: var(--paper);
+    font-family: var(--hand);
+    font-size: 1.45rem;
+    font-weight: 500;
+    line-height: 1.2;
+    border-bottom: 1px dashed var(--muted);
+}
+.text-button:hover { color: var(--gold); border-color: var(--gold); }
 
 .primary-button,
 .secondary-button {
@@ -182,3 +204,11 @@ button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visibl
 .start-actions button:disabled {
   cursor: not-allowed;
 }
+.start-actions .text-button {
+    justify-self: center;
+    color: var(--pen);
+    border-color: #7f9381;
+    font-size: 1.4rem;
+    padding: 7px 6px 3px;
+}
+.start-actions .text.button:hover { color: var(--red-ink); border-color: var(--red-ink); }
