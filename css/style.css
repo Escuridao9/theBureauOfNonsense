@@ -1,41 +1,66 @@
 @charset "UTF-8";
 
 :root {
-    color-scheme: dark;
-    --desk: #294643;
-    --paper: #fff4dc;
-    --paper-bright: #fff9eb;
-    --ink: #303d3b;
-    --sans: Arial, Helvetica, sans-serif;
+  color-scheme: dark;
+  --desk: #294643;
+  --paper: #fff4dc;
+  --paper-bright: #fff9eb;
+  --ink: #303d3b;
+  --sans: Arial, Helvetica, sans-serif;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
-    margin: 0;
-    background: var(--desk);
-    color: var(--paper);
-    font-family: var(--sans);
-    font-size: 1rem;
-    line-height: 1.5;
+  margin: 0;
+  background: var(--desk);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-.bureau-shell { max-width: 1480px; margin: auto; padding: 28px 38px 0; }
+.bureau-shell {
+  max-width: 1480px;
+  margin: auto;
+  padding: 28px 38px 0;
+}
 
 .start-screen {
-    display: grid;
-    place-items: center;
-    min-height: calc(100svh - 56px);
-    padding: 18px 10px 25px;
+  display: grid;
+  place-items: center;
+  min-height: calc(100svh - 56px);
+  padding: 18px 10px 25px;
 }
+
 .start-paper {
-    color-scheme: light;
-    width: min(100%, 650px);
-    padding: 26px 36px 23px;
-    color: var(--ink);
-    background: linear-gradient(115deg, var(--paper-bright), var(--paper));
-    border: 1px solid #dfd0b1;
-    border-radius: 4px 7px 2px 5px;
-    box-shadow: 4px 6px 0 #dbc9a7, 8px 11px 0 #19362f66, 0 16px 38px #102c293d;
-    text-align: center;
+  color-scheme: light;
+  width: min(100%, 650px);
+  padding: 26px 36px 23px;
+  color: var(--ink);
+  background: linear-gradient(115deg, var(--paper-bright), var(--paper));
+  border: 1px solid #dfd0b1;
+  border-radius: 4px 7px 2px 5px;
+  box-shadow:
+    4px 6px 0 #dbc9a7,
+    8px 11px 0 #19362f66,
+    0 16px 38px #102c293d;
+  text-align: center;
 }
+
+.start-actions {
+    display: grid;
+    gap: 11px;
+    max-width: 345px;
+    margin: 24px auto 0;
+}
+.start-actions .primary-button,
+.start-actions .secondary-button {
+    min-height: 50px;
+    font-size: 1.6rem;
+}
+.start-actions .primary-button { transform: rotate(-.65deg); }
+.start-actions .secondary-button { transform: rotate(.45deg); }
+.start-actions button:disabled { cursor: not-allowed; }
