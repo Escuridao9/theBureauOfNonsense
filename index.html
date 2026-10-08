@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>The Bureau of Nonsense</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div class="bureau-shell">
@@ -16,10 +16,12 @@
         >
           <div class="start-paper">
             <div class="start-topline">
-                <span>MINISTRY OF EXCEEDINGLY SPECIFIC AFFAIRS</span>
-                <span>EST. 1984</span>
+              <span>MINISTRY OF EXCEEDINGLY SPECIFIC AFFAIRS</span>
+              <span>EST. 1984</span>
             </div>
-            <p class="eyebrow start-eyebrow">A position has become available.</p>
+            <p class="eyebrow start-eyebrow">
+              A position has become available.
+            </p>
             <h1 id="start-title" tabindex="-1">
               The Bureau<br /><em>of Nonsense</em>
             </h1>
@@ -31,35 +33,112 @@
               your name on it.
             </p>
             <nav class="start-actions" aria-label="Campaign-menu">
-                <button id="new-campaign-button" class="primary-button" type="button" disabled>New Campaign</button>
-                <button id="continue-campaign-button" class="secondary-button" type="button" aria-describedby="campaign-status" disabled>Continue Campaign</button>
-                <button id="honours-button" class="secondary-button" type="button" disabled>Roll of Honour</button>
-                <button id="settings-button" class="text-button" type="button">Settings</button>
+              <button
+                id="new-campaign-button"
+                class="primary-button"
+                type="button"
+                disabled
+              >
+                New Campaign
+              </button>
+              <button
+                id="continue-campaign-button"
+                class="secondary-button"
+                type="button"
+                aria-describedby="campaign-status"
+                disabled
+              >
+                Continue Campaign
+              </button>
+              <button
+                id="honours-button"
+                class="secondary-button"
+                type="button"
+                disabled
+              >
+                Roll of Honour
+              </button>
+              <button id="settings-button" class="text-button" type="button">
+                Settings
+              </button>
             </nav>
-            <p id="loading-state" class="menu-status" role="status">Unlocking the filling cabinet...</p>
-            <p id="campaign-status" class="menu-status" role="status" hidden></p>
-            <section id="error-state" class="menu-error" aria-label="Loading error" hidden>
-                <p id="error-message">The filing cabinet is stuck. Please try again.</p>
-                <button id="retry-button" class="secondary-button" type="button">Try again</button>
+            <p id="loading-state" class="menu-status" role="status">
+              Unlocking the filling cabinet...
+            </p>
+            <p
+              id="campaign-status"
+              class="menu-status"
+              role="status"
+              hidden
+            ></p>
+            <section
+              id="error-state"
+              class="menu-error"
+              aria-label="Loading error"
+              hidden
+            >
+              <p id="error-message">
+                The filing cabinet is stuck. Please try again.
+              </p>
+              <button id="retry-button" class="secondary-button" type="button">
+                Try again
+              </button>
             </section>
             <div class="start-bottomline">
-                <span>BEST NORMAL RUN <strong id="menu-best-score">-</strong></span>
-                <span>Every stamp leaves a paper trail.</span>
+              <span
+                >BEST NORMAL RUN <strong id="menu-best-score">-</strong></span
+              >
+              <span>Every stamp leaves a paper trail.</span>
             </div>
           </div>
         </section>
       </main>
     </div>
-    <dialog id="settings-dialog" class="bureau-dialog settings-dialog" aria-labelledby="settings-title">
-        <div class="dialog-topline">
-            <span>OFFICE ATMOSPHERE</span>
-            <span>YOUR PREFERENCES</span>
+    <dialog
+      id="settings-dialog"
+      class="bureau-dialog settings-dialog"
+      aria-labelledby="settings-title"
+    >
+      <div class="dialog-topline">
+        <span>OFFICE ATMOSPHERE</span>
+        <span>YOUR PREFERENCES</span>
+      </div>
+      <p class="eyebrow">A little less silence, perhaps.</p>
+      <h2 id="settings-title">Set the mood.</h2>
+      <p class="dialog-lead">Give the room its own rhythm.</p>
+      <fieldset class="audio-setting">
+        <legend>Atmosphere sounds</legend>
+        <p id="atmosphere-description">
+          A quiet office, with traffic somewhere outside.
+        </p>
+        <label class="audio-toggle">
+          <input id="atmosphere-enabled" type="checkbox" checked />
+          <span>Atmosphere on</span>
+        </label>
+        <div class="volume-heading">
+          <label for="atmosphere-volume">Volume</label>
+          <output id="atmosphere-volume-output" for="atmosphere-volume"
+            >65%</output
+          >
         </div>
-        <p class="eyebrow">A little less silence, perhaps.</p>
-        <h2 id="settings-title">Set the mood.</h2>
-        <p class="dialog-lead">Give the room its own rhythm.</p>
-        <p id="settings-status" class="settings-status" role="status">Your preferences stay with this browser.</p>
-        <button id="close-settings-button" class="primary-button" type="button">Done</button>
+        <input
+          id="atmosphere-volume"
+          class="volume-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="65"
+          aria-describedby="atmosphere-description"
+          aria-label="Atmosphere volume"
+        />
+      </fieldset>
+      <p id="settings-status" class="settings-status" role="status">
+        Your preferences stay with this browser.
+      </p>
+      <button id="close-settings-button" class="primary-button" type="button">
+        Done
+      </button>
     </dialog>
   </body>
 </html>
