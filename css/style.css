@@ -22,6 +22,7 @@
   --paper: #fff4dc;
   --paper-bright: #fff9eb;
   --ink: #303d3b;
+  --pen: #285674;
   --mono: "Special Elite", "Courier New", Courier, monospace;
   --sans: Arial, Helvetica, sans-serif;
   --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
@@ -40,7 +41,13 @@ body {
   line-height: 1.5;
 }
 
-h1 { font-family: var(--hand); }
+h1 { 
+    font-family: var(--hand);
+    font-size: clamp(2.4rem, 3.5vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.02;
+}
 
 .bureau-shell {
   max-width: 1480px;
@@ -68,6 +75,13 @@ h1 { font-family: var(--hand); }
     8px 11px 0 #19362f66,
     0 16px 38px #102c293d;
   text-align: center;
+}
+.start-paper h1 {
+    color: var(--pen);
+    font-size: clamp(3.6rem, 7.3vw, 5.3rem);
+    line-height: .93;
+    margin: 13px 0 17px;
+    letter-spacing: -.035em;
 }
 
 .start-actions {
