@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+:root {
+    color-scheme: dark;
+    --desk: #294643;
+    --paper: #fff4dc;
+    --sans: Arial, Helvetica, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--desk);
+    color: var(--paper);
+    font-family: var(--sans);
+    font-size: 1rem;
+    line-height: 1.5;
+}
