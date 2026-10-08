@@ -175,6 +175,22 @@
         aria-describedby="effects-description" aria-label="Stamp sound volume">
       </fieldset>
 
+      <fiedlset class="audio-setting">
+        <legend>Paper slide</legend>
+        <p id="paper-description">A smooth swish as each new request slides onto your desk.</p>
+        <label class="audio-toggle">
+            <input id="paper-enabled" type="checkbox" checked>
+            <span>Paper slide on</span>
+        </label>
+        <div class="volume-heading">
+            <label for="paper-volume">Volume</label>
+            <output id="paper-volume-output" for="paper-volume">55%</output>
+        </div>
+        <input id="paper-volume" class="volume-slider" type="range"
+        min="0" max="100" step="1" value="55"
+        aria-describedby="paper-description" aria-label="Paper slide volume">
+      </fiedlset>
+
       <p id="settings-status" class="settings-status" role="status">
         Your preferences stay with this browser.
       </p>
