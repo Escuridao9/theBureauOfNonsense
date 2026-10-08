@@ -18,11 +18,15 @@
 
 :root {
   color-scheme: dark;
+
   --desk: #294643;
   --paper: #fff4dc;
   --paper-bright: #fff9eb;
   --ink: #303d3b;
   --pen: #285674;
+  --coral: #efa58f;
+  --red-ink: #a84432;
+
   --mono: "Special Elite", "Courier New", Courier, monospace;
   --sans: Arial, Helvetica, sans-serif;
   --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
@@ -47,6 +51,16 @@ h1 {
     font-weight: 600;
     letter-spacing: -.02em;
     line-height: 1.02;
+}
+h1 em {
+    color: var(--coral);
+    font-style: normal;
+    display: inline-block;
+    transform: rotate(-2deg);
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 6px;
 }
 
 .bureau-shell {
@@ -82,6 +96,10 @@ h1 {
     line-height: .93;
     margin: 13px 0 17px;
     letter-spacing: -.035em;
+}
+.start-paper h1 em {
+    color: var(--red-ink);
+    text-decoration: none;
 }
 
 .start-actions {
