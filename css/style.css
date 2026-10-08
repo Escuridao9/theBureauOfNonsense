@@ -414,6 +414,43 @@ input:focus-visible {
     line-height: 1.6;
 }
 
+.audio-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    cursor: pointer;
+    margin-top: 13px;
+    padding: 3px 0;
+    font-size: .875rem;
+    color: var(--ink);
+}
+
+.audio-toggle input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--pen);
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.volume-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 18px;
+    margin-top: 14px;
+    color: var(--paper-muted);
+    font-size: .875rem;
+}
+
+.volume-heading output {
+    font-family: var(--mono);
+    color: var(--pen);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
 @media (max-width: 1180px) {
   .buerau-shell {
     padding: 26px 28px 0;
