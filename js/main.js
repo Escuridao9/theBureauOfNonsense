@@ -7,6 +7,7 @@ const element = id => document.getElementById(id);
 
 const audio = createAudioController({
     atmosphere: element("atmosphere-audio"),
+    music: element("music-audio"),
     effects: element("stamp-audio"),
     paper: element("paper-audio")
 }, storage.loadSettings(), settings => {
