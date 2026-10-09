@@ -67,6 +67,38 @@ export function checkRule(rule, application, officeDate) {
         `The office date is ${formatDate(officeDate)}; it must still be valid that day.`;
       break;
 
+    case "oneOf":
+      passed = rule.allowed.some(
+        (item) => normalizeText(item) === normalizeText(value),
+      );
+      explanation =
+        `The requested destination is ${value}.` +
+        `Only ${rule.allowed.join(", ")} are authorised.`;
+
+    case "timeWindow": {
+      const current = timeInMinutes(value);
+      const start = timeInMinutes(rule.start);
+      const end = timeInMinutes(rule.end);
+
+      passed =
+        Number.isFinite(current) &&
+        (start <= end
+          ? current >= start && current <= end
+          : current >= start || current <= end);
+
+      explanation =
+        `The proposed start is ${value}.` +
+        `Permitted start times run from ${rule.start} through midnight to ${rule.end}, inclusive.`;
+      break;
+    }
+
+    case "equals":
+      passed = value === rule.required;
+      explanation =
+        `Property owner consent is ${value ? "provided" : "not provided"}.` +
+        "Consent is required.";
+      break;
+
     default:
       throw new Error(`Unknown regulation type: ${rule.type}`);
   }
