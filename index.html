@@ -95,6 +95,90 @@
         </section>
       </main>
     </div>
+
+    <dialog
+      id="mode-dialog"
+      class="bureau-dialog mode-dialog"
+      aria-labelledby="mode-title"
+    >
+      <div class="dialog-topline">
+        <span>APPOINTMENT FORM</span>
+        <span>PLEASE CHOOSE ONE</span>
+      </div>
+      <p class="eyebrow">A fresh stack of possibilities.</p>
+      <h2 id="mode-title">Choose your appointment.</h2>
+      <form id="mode-form">
+        <fieldset class="mode-options">
+          <legend class="sr-only">Campaign mode</legend>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="normal" checked required />
+            <span>
+              <strong>Normal</strong>
+              <small>Standard appointment - No timer</small>
+              <span
+                >Three shifts, eighteen applications. Take the time you
+                need.</span
+              >
+            </span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="hard" />
+            <span>
+              <strong>Under Pressure</strong>
+              <small>Harder appointment - 20-second decisions</small>
+              <span
+                >The same three shifts, with 20 seconds to approve or file a
+                rejection. A missed deadline counts as a wrong decision.</span
+              >
+            </span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="endless" />
+            <span>
+              <strong>Never-ending Paperwork</strong>
+              <small>Endless appointment - Three wrong verdicts</small>
+              <span
+                >No timer. The departments keep sending work until your third
+                wrong verdict closes the run.</span
+              >
+            </span>
+          </label>
+        </fieldset>
+        <label class="cler-label" for="clerk-input"
+          >Clerk's name <span>(optional)</span></label
+        >
+        <input
+          id="clerk-input"
+          name="clerk"
+          class="clerk-input"
+          type="text"
+          maxlength="24"
+          placeholder="A. Clerk"
+          autocomplete="off"
+        />
+        <p class="mode-footnote">
+          Only finished runs enter the Roll of Honour. Records are kept
+          separately for each appointment.
+        </p>
+        <div class="dialog-actions">
+          <button
+            id="cancel-mode-button"
+            class="secondary-button"
+            type="button"
+          >
+            Back to menu
+          </button>
+          <button
+            id="start-campaign-button"
+            class="primary-button"
+            type="submit"
+          >
+            Take your seat
+          </button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog
       id="settings-dialog"
       class="bureau-dialog settings-dialog"
@@ -134,7 +218,7 @@
           aria-label="Atmosphere volume"
         />
       </fieldset>
-      
+
       <fieldset class="audio-setting">
         <legend>Music</legend>
         <p id="music-description">The Five-Floor Goodbye - Ryan Ike.</p>
@@ -161,34 +245,54 @@
 
       <fieldset class="audio-setting">
         <legend>Stamp sound</legend>
-        <p id="effects-description">A firm thump when an application is approved or denied.</p>
+        <p id="effects-description">
+          A firm thump when an application is approved or denied.
+        </p>
         <label class="audio-toggle">
-            <input id="effects-enabled" type="checkbox" checked>
-            <span>Stamp sound on</span>
+          <input id="effects-enabled" type="checkbox" checked />
+          <span>Stamp sound on</span>
         </label>
         <div class="volume-heading">
-            <label for="effects-volume">Volume</label>
-            <output id="effects-volume-output" for="effects-volume">75%</output>
+          <label for="effects-volume">Volume</label>
+          <output id="effects-volume-output" for="effects-volume">75%</output>
         </div>
-        <input id="effects-volume" class="volume-slider" type="range"
-        min="0" max="100" step="1" value="75"
-        aria-describedby="effects-description" aria-label="Stamp sound volume">
+        <input
+          id="effects-volume"
+          class="volume-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="75"
+          aria-describedby="effects-description"
+          aria-label="Stamp sound volume"
+        />
       </fieldset>
 
       <fieldset class="audio-setting">
         <legend>Paper slide</legend>
-        <p id="paper-description">A smooth swish as each new request slides onto your desk.</p>
+        <p id="paper-description">
+          A smooth swish as each new request slides onto your desk.
+        </p>
         <label class="audio-toggle">
-            <input id="paper-enabled" type="checkbox" checked>
-            <span>Paper slide on</span>
+          <input id="paper-enabled" type="checkbox" checked />
+          <span>Paper slide on</span>
         </label>
         <div class="volume-heading">
-            <label for="paper-volume">Volume</label>
-            <output id="paper-volume-output" for="paper-volume">55%</output>
+          <label for="paper-volume">Volume</label>
+          <output id="paper-volume-output" for="paper-volume">55%</output>
         </div>
-        <input id="paper-volume" class="volume-slider" type="range"
-        min="0" max="100" step="1" value="55"
-        aria-describedby="paper-description" aria-label="Paper slide volume">
+        <input
+          id="paper-volume"
+          class="volume-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="55"
+          aria-describedby="paper-description"
+          aria-label="Paper slide volume"
+        />
       </fieldset>
 
       <p id="settings-status" class="settings-status" role="status">
@@ -199,9 +303,31 @@
       </button>
     </dialog>
 
-    <audio id="atmosphere-audio" src="assets/audio/office-room-tone.mp3" loop preload="none" aria-hidden="true"></audio>
-    <audio id="music-audio" src="assets/audio/the-five-floor-goodbye-loop.flac" loop preload="none" aria-hidden="true"></audio>
-    <audio id="stamp-audio" src="assets/audio/stamp.wav" preload="auto" aria-hidden="true"></audio>
-    <audio id="paper-audio" src="assets/audio/paper-slide.wav" preload="auto" aria-hidden="true"></audio>
+    <audio
+      id="atmosphere-audio"
+      src="assets/audio/office-room-tone.mp3"
+      loop
+      preload="none"
+      aria-hidden="true"
+    ></audio>
+    <audio
+      id="music-audio"
+      src="assets/audio/the-five-floor-goodbye-loop.flac"
+      loop
+      preload="none"
+      aria-hidden="true"
+    ></audio>
+    <audio
+      id="stamp-audio"
+      src="assets/audio/stamp.wav"
+      preload="auto"
+      aria-hidden="true"
+    ></audio>
+    <audio
+      id="paper-audio"
+      src="assets/audio/paper-slide.wav"
+      preload="auto"
+      aria-hidden="true"
+    ></audio>
   </body>
 </html>
