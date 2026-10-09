@@ -98,6 +98,8 @@ export function createCampaign(definition, saved = null, random = Math.random,
 
         return {
             startShift,
+            submit,
+            expire,
             pauseClock,
             resumeClock,
             getView,
@@ -128,6 +130,37 @@ export function createCampaign(definition, saved = null, random = Math.random,
             if (state.phase !== "briefing") return false;
             state = { ...state, phase: "inspection", timer: freshTimer(true) };
             return true;
+        }
+
+        function commit(result) {
+            const results = [...state.results, result];
+            const ended = details.endless &&
+                results.filter(item => !item.correctDecision).length === 3;
+
+            state = {
+                ...state,
+                phase: "feedback",
+                results,
+                endedAt: ended ? new Date(now()).toISOString() : null,
+                timer: details.timed
+                    ? { remainingMs, remaining(), deadline: null }
+                    : null
+            };
+
+            return structuredClone(result);
+        }
+
+        function expire() {
+            if (state.phase !== "inspection" || !details.timed || remaining() > 0) return null;
+            return commit(assessInspection(currentShift(), currentApplication(), "timeout"));
+        }
+
+        function submit(decision, reasons = []) {
+            if (state.phase !== "inspection") return null;
+            if (details.timed && remaining() <= 0) return expire();
+            if (!["approve", "reject"].includes(decision)) throw new Error("Unknown decision.");
+
+            return commit(assessInspection(currentShift(), currentApplication(), decision, reasons));
         }
 
         function pauseClock() {
