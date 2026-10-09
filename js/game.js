@@ -143,7 +143,7 @@ export function createCampaign(definition, saved = null, random = Math.random,
                 results,
                 endedAt: ended ? new Date(now()).toISOString() : null,
                 timer: details.timed
-                    ? { remainingMs, remaining(), deadline: null }
+                    ? { remainingMs: remaining(), deadline: null }
                     : null
             };
 
