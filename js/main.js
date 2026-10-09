@@ -57,3 +57,28 @@ document.addEventListener("pointerdown", () => audio.activate());
 document.addEventListener("keydown", () => audio.activate());
 
 syncSettings();
+
+function closeDialogs() {
+    for (const dialog of document.querySelectorAll("dialog[open]")) {
+        dialog.close();
+    }
+}
+
+function openModeChoose() {
+    closeDialogs();
+    element("mode-form").reset();
+    element("mode-dialog").showModal();
+}
+
+element("new-campaign-button").addEventListener("click", openModeChoose);
+
+element("cancel-mode-button").addEventListener("click", () => {
+    element("mode-dialog").close();
+});
+
+element("mode-form").addEventListener("submit", event => {
+    event.preventDefault();
+});
+
+element("new-campaign-button").disabled = false;
+element("start-campaign-button").disabled = true;
