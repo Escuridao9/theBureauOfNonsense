@@ -5,7 +5,11 @@ const storage = createStorage();
 
 const element = id => document.getElementById(id);
 
-const audio = createAudioController({}, storage.loadSettings(), settings => {
+const audio = createAudioController({
+    atmosphere: element("atmosphere-audio"),
+    effects: element("stamp-audio"),
+    paper: element("paper-audio")
+}, storage.loadSettings(), settings => {
     const saved = storage.saveSettings(settings);
     element("settings-status").textContent = saved
     ? "Preferences saved. Make yourself comfortable."
@@ -48,4 +52,6 @@ for (const channel of Object.keys(audio-getSettings())) {
     });
 }
 
+document.addEventListener("pointerdown", () => audio.activate());
+document.addEventListener("keydown", () => audio.activate());
 syncSettings();

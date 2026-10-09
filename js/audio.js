@@ -47,6 +47,17 @@ export function createAudioController(players, initialSettings, onChange = () =>
         }
     }
 
+    function playOneShot(channel) {
+        activated = true;
+        apply();
+        const sound = players[channel];
+        if(!sound || sound.muted || !hasSource(sound)) return;
+        try {
+            sound.currentTime = 0;
+            sound.play()?.catch(() => {});
+        } catch { }
+    }
+
     function setChannel(channel, changes) {
         if (!CHANNELS.includes(channel)) return;
         settings = normalizeAudioSettings({
@@ -63,6 +74,8 @@ export function createAudioController(players, initialSettings, onChange = () =>
 
     return {
         getSettings, setChannel,
+        playStamp: () => playOneShot("effects"),
+        playPaper: () => playOneShot("paper"),
         activate: () => { activated = true; apply(); }
     };
 }
