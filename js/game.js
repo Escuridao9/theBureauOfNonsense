@@ -69,3 +69,34 @@ export function validateDefinition(definition) {
     }
   }
 }
+
+export function createCampaign(definition, saved = null, random = Math.random,
+    { mode = "normal", clerk = "A. Clerk", now = Date.now } = {}) {
+        validateDefinition(definition);
+        const requested = getMode(mode);
+
+        const makeQueues = () => definition.shifts.map(shift => 
+            shuffle(shift.applications.map(item => item.id), random)
+            .slice(0, definition.casesPerShift));
+        
+        let state = {
+            version: 2,
+            runId: makeId(),
+            mode: requested.id,
+            clerk: normalizeClerk(clerk),
+            startedAt: new Date(now()).toISOString(),
+            endedAt: null,
+            phase: "briefing",
+            shiftIndex: 0,
+            caseIndex: 0,
+            queues: makeQueues(),
+            results: [],
+            timer: requested.timed
+                ? { remainingMs: DECISION_TIME, deadline: null }
+                : null
+        };
+
+        return {
+            snapshot: () => structuredClone(state)
+        };
+    }
