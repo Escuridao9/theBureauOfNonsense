@@ -54,4 +54,5 @@ for (const channel of Object.keys(audio-getSettings())) {
 
 document.addEventListener("pointerdown", () => audio.activate());
 document.addEventListener("keydown", () => audio.activate());
+
 syncSettings();
