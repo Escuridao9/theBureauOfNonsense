@@ -147,3 +147,12 @@ export function assessInspection(shift, application, decision, reasons = []) {
         violations: violations.map(violation => violation.id)
     };
 }
+
+export function calculateTotals(results) {
+    return results.reduce((totals, result) => ({
+        count: totals.count + 1,
+        points: totals.points + result.points,
+        correct: totals.correct + Number(result.correctDecision),
+        perfect: totals.perfect + Number(result.perfect)
+    }), { count: 0, points: 0, correct: 0, perfect: 0 });
+}
