@@ -97,7 +97,13 @@ export function createCampaign(definition, saved = null, random = Math.random,
         };
 
         return {
+            startShift,
+            pauseClock,
+            resumeClock,
             getView,
+            timeRemaining: () => details.timed && state.phase === "inspection"
+            ? remaining()
+            : null,
             snapshot: () => structuredClone(state)
         };
 
@@ -108,6 +114,32 @@ export function createCampaign(definition, saved = null, random = Math.random,
             item.id === state.queues[state.shiftIndex][state.caseIndex]);
         const mistakes = () => state.results.filter(result => !result.correctDecision).length;
         
+        const remaining = () => !state.timer
+        ? null
+        : state.timer.deadline === null
+            ? state.timer.remainingMs
+            : Math.max(0, Math.min(state.timer.remainingMs, state.timer.deadline - now()));
+
+        const freshTimer = active => details.timed
+            ? { remainingMs: DECISION_TIME, deadline: active ? now() + DECISION_TIME : null }
+            : null;
+
+        function startShift() {
+            if (state.phase !== "briefing") return false;
+            state = { ...state, phase: "inspection", timer: freshTimer(true) };
+            return true;
+        }
+
+        function pauseClock() {
+            if (!details.timed || state.phase !== "inspection") return;
+                state = { ...state, timer: { remainingMs: remaining(), deadline: null } };
+        }
+
+        function resumeClock() {
+            if (!details.timed || state.phase !== "inspection" || state.timer.deadline !== null) return;
+            state = { ...state, timer: { ...state.timer, deadline: now() + state.timer.remainingMs } };
+        }
+
         function getView() {
             const shift = currentShift();
             const shiftResults = state.results.slice(
