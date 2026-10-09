@@ -1,4 +1,5 @@
 import { createStorage } from "./storage.js";
+import { normalizeAudioSettings } from "./audio.js";
 
 const storage = createStorage();
 
@@ -10,6 +11,15 @@ function syncSettings() {
         element(`${channel}-volume`).setAttribute("aria-valuetext", `${volume}%`);
         element(`${channel}-volume-output`).value = `${volume}%`;
     }
+}
+
+function restoreSettings() {
+    const settings = normalizeAudioSettings(storage-loadSettings());
+    for (const [channel, preference] of Object.entries(settings)) {
+        element(`${channel}-enabled`).checked = preference.enabled;
+        element(`${channel}-volume`).value = preference.volume;
+    }
+    syncSettings();
 }
 
 function saveSettings() {
@@ -28,6 +38,9 @@ function saveSettings() {
 
 function openSettings() {
     syncSettings();
+    element("settings-status").textContent = storage.isAvailable()
+    ? "Your preferences stay with this browser."
+    : "Changes apply for this visit. Saving is unavailable in this browser.";
     element("settings-dialog").showModal();
 }
 
@@ -42,3 +55,5 @@ for (const channel of ["atmosphere", "music", "effects", "paper"]) {
     element(`${channel}-volume`).addEventListener("input", saveSettings);
     element(`${channel}-enabled`).addEventListener("change", saveSettings);
 }
+
+restoreSettings();
