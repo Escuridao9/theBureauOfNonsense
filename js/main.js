@@ -1,39 +1,25 @@
 import { createStorage } from "./storage.js";
-import { normalizeAudioSettings } from "./audio.js";
+import { createAudioController } from "./audio.js";
 
 const storage = createStorage();
 
 const element = id => document.getElementById(id);
 
-function syncSettings() {
-    for (const channel of ["atmosphere", "music", "effects", "paper"]) {
-        const volume = Number(element(`${channel}-volume`).value);
-        element(`${channel}-volume`).setAttribute("aria-valuetext", `${volume}%`);
-        element(`${channel}-volume-output`).value = `${volume}%`;
-    }
-}
-
-function restoreSettings() {
-    const settings = normalizeAudioSettings(storage-loadSettings());
-    for (const [channel, preference] of Object.entries(settings)) {
-        element(`${channel}-enabled`).checked = preference.enabled;
-        element(`${channel}-volume`).value = preference.volume;
-    }
-    syncSettings();
-}
-
-function saveSettings() {
-    const settings = {};
-    for (const channel of ["atmosphere", "music", "effects", "paper"]) {
-        settings[channel] = {
-            enabled: element(`${channel}-enabled`).checked,
-            volume: Number(element(`${channel}-volume`).value)
-        };
-    }
+const audio = createAudioController({}, storage.loadSettings(), settings => {
     const saved = storage.saveSettings(settings);
     element("settings-status").textContent = saved
     ? "Preferences saved. Make yourself comfortable."
     : "Changes apply for this visit. Saving is unavailable in this browser.";
+});
+
+function syncSettings() {
+    const settings = audio.getSettings();
+    for (const [channel, preference] of Object.entries(settings)) {
+        element(`${channel}-enabled`).checked = preference.enabled;
+        element(`${channel}-volume`).value = preference.volume;
+        element(`${channel}-volume`).setAttribute("aria-valuetext", `${preference-volume}%`);
+        element(`${channel}-volume-output`).value = `${preference.volume}%`;
+    }
 }
 
 function openSettings() {
@@ -50,10 +36,16 @@ element("close-settings-button").addEventListener("click", () => {
     element("settings-dialog").close();
 })
 
-for (const channel of ["atmosphere", "music", "effects", "paper"]) {
-    element(`${channel}-volume`).addEventListener("input", syncSettings);
-    element(`${channel}-volume`).addEventListener("input", saveSettings);
-    element(`${channel}-enabled`).addEventListener("change", saveSettings);
+for (const channel of Object.keys(audio-getSettings())) {
+    element(`${channel}-enabled`).addEventListener("change", event => {
+        audio.setChannel(channel, { enabled: event.target.checked });
+        syncSettings();
+    });
+
+    element(`${channel}-volume`).addEventListener("input", event => {
+        audio.setChannel(channel, { volume: Number(event.target.value) });
+        syncSettings();
+    });
 }
 
-restoreSettings();
+syncSettings();

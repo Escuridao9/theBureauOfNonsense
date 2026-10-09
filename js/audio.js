@@ -17,3 +17,18 @@ export function normalizeAudioSettings(value) {
         }];
     }));
 }
+
+export function createAudioController(players, initialSettings, onChange = () => {}) {
+    let settings = normalizeAudioSettings(initialSettings);
+    const getSettings = () => structuredClone(settings);
+
+    function setChannel(channel, changes) {
+        if (!CHANNELS.includes(channel)) return;
+        settings = normalizeAudioSettings({
+            ...settings, [channel]: { ...settings[channel], ...changes }
+        });
+        onChange(getSettings());
+    }
+
+    return { getSettings, setChannel };
+}
