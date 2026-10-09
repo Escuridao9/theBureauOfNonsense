@@ -538,6 +538,52 @@ input:focus-visible {
   gap: 5px;
 }
 
+.mode-option strong {
+  color: var(--pen);
+  font-family: var(--hand);
+  font-size: 1.8rem;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.mode-option small {
+  color: var(--paper-muted);
+  font-family: var(--mono);
+  font-size: .6875rem;
+  line-height: 1.6;
+}
+
+.mode-option > span > span {
+  font-size: .8125rem;
+  line-height: 1.6;
+}
+
+.clerk-label {
+  display: block;
+  font-family: var(--hand);
+  font-size: 1.45rem;
+  color: var(--pen);
+}
+
+.clerk-label > span {
+  font-family: var(--sans);
+  font-size: .75rem;
+  color: var(--paper-muted);
+}
+
+.clerk-input {
+  width: 100%;
+  color: var(--pen);
+  background: #fffaf0;
+  border: 0;
+  border-bottom: 1px solid #8faaa9;
+  border-radius: 0;
+  padding: 8px 10px;
+  margin: 4px 0 10px;
+  font-family: var(--hand);
+  font-size: 1.5rem;
+}
+
 @media (max-width: 1180px) {
   .bureau-shell {
     padding: 26px 28px 0;
