@@ -495,6 +495,49 @@ input:focus-visible {
     box-shadow: 0 0 0 1px var(--pen);
 }
 
+.mode-dialog {
+  width: min(640px, calc(100% - 32px));
+}
+
+.mode-options {
+  border: 0;
+  padding: 0;
+  margin: 22px 0;
+  display: grid;
+  gap: 11px;
+}
+
+.mode-option {
+  display: flex;
+  gap: 13px;
+  padding: 15px 17px;
+  border: 1px dashed #a9b4a0;
+  border-radius: 4px 2px 5px 3px;
+  cursor: pointer;
+  background: #ffffff36;
+}
+
+.mode-option:has(input:checked) {
+  border: 2px solid var(--pen);
+  padding: 14px 16px;
+  background: #dbe7df70;
+  box-shadow: 2px 2px 0 #28567415;
+}
+
+.mode-option input {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  margin: 9px 0 0;
+  accent-color: var(--pen);
+}
+
+.mode-option > span {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
 @media (max-width: 1180px) {
   .bureau-shell {
     padding: 26px 28px 0;
