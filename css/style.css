@@ -60,6 +60,18 @@ blockquote {
   display: none !important;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 fieldset { border: 0; margin: 0; padding: 0; }
 
 h1 {
@@ -584,6 +596,25 @@ input:focus-visible {
   font-size: 1.5rem;
 }
 
+.mode-footnote {
+  color: var(--paper-muted);
+  font-size: .75rem;
+  line-height: 1.6;
+  margin-top: 13px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.dialog-actions > button {
+  flex: 1;
+  min-width: 0;
+}
+
 @media (max-width: 1180px) {
   .bureau-shell {
     padding: 26px 28px 0;
@@ -643,4 +674,21 @@ input:focus-visible {
   .settings-dialog {
     width: calc(100% - 24px);
   }
+  .mode-dialog {
+  width: calc(100% - 24px);
+  padding: 22px;
+}
+
+.mode-option {
+  padding: 12px;
+  gap: 10px;
+}
+
+.mode-option:has(input:checked) {
+  padding: 11px;
+}
+
+.mode-option strong {
+  font-size: 1.6rem;
+}
 }
