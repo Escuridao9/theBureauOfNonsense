@@ -31,7 +31,7 @@ export function getModeIds() {
     return Object.keys(MODES);
 }
 
-export function normaliseClerk(value) {
-    return String(value ?? "").replace(/[u0000-\u001f\u007f]/g, "").trim()
+export function normalizeClerk(value) {
+    return String(value ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim()
     .replace(/\s+/g, " ").slice(0, 24) || "A. Clerk";
 }

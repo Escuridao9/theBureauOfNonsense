@@ -271,7 +271,7 @@ input:focus-visible {
   font-size: 1.4rem;
   padding: 7px 6px 3px;
 }
-.start-actions .text.button:hover {
+.start-actions .text-button:hover {
   color: var(--red-ink);
   border-color: var(--red-ink);
 }
@@ -361,6 +361,12 @@ input:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.dialog-lead {
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.65;
+  margin-top: 15px;
+}
 .dialog-topline {
   display: flex;
   justify-content: space-between;
@@ -490,7 +496,7 @@ input:focus-visible {
 }
 
 @media (max-width: 1180px) {
-  .buerau-shell {
+  .bureau-shell {
     padding: 26px 28px 0;
   }
 }

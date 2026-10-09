@@ -22,7 +22,7 @@ function syncSettings() {
     for (const [channel, preference] of Object.entries(settings)) {
         element(`${channel}-enabled`).checked = preference.enabled;
         element(`${channel}-volume`).value = preference.volume;
-        element(`${channel}-volume`).setAttribute("aria-valuetext", `${preference-volume}%`);
+        element(`${channel}-volume`).setAttribute("aria-valuetext", `${preference.volume}%`);
         element(`${channel}-volume-output`).value = `${preference.volume}%`;
     }
 }
@@ -41,7 +41,7 @@ element("close-settings-button").addEventListener("click", () => {
     element("settings-dialog").close();
 })
 
-for (const channel of Object.keys(audio-getSettings())) {
+for (const channel of Object.keys(audio.getSettings())) {
     element(`${channel}-enabled`).addEventListener("change", event => {
         audio.setChannel(channel, { enabled: event.target.checked });
         syncSettings();
