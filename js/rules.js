@@ -105,3 +105,45 @@ export function checkRule(rule, application, officeDate) {
 
   return { id: rule.id, title: rule.title, passed, explanation };
 }
+
+export function assessInspection(shift, application, decision, reasons = []) {
+    if (!["approve", "reject", "timeout"].includes(decision)) {
+        throw new Error("Unknown decision.");
+    }
+
+    const uniqueReasons = [...new Set(reasons)];
+
+    if (uniqueReasons.some(id => !shift.rules.some(rule => rule.id === id))) {
+        throw new Error ("The cited regulation does not belong to this department.");
+    }
+
+    if (decision === "reject" && uniqueReasons.length === 0) {
+        throw new Error("A rejection needs at least one reason.");
+    }
+
+    const checks = shift.rules.map(rule => checkRule(rule, application, shift.date));
+    const violations = checks.filter(check => !check.passed);
+    const expectedDecision = violations.length === 0 ? "approve" : "reject";
+    const correctDecision = decision === expectedDecision;
+
+    const justified = decision === "approve" || 
+    (uniqueReasons.length === violations.length &&
+        violations.every(violation => uniqueReasons.includes(violation.id)));
+
+    const perfect = correctDecision && justified;
+    const points = correctDecision ? 10 + (perfect ? 5 : 0) : 0;
+
+    return {
+        shiftId: shift.id,
+        caseId: application.id,
+        decision,
+        reasons: decision === "reject" ? uniqueReasons : [],
+        expectedDecision,
+        correctDecision,
+        perfect,
+        points,
+        checks,
+        timedOut: decision === "timeout",
+        violations: violations.map(violation => violation.id)
+    };
+}
