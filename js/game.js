@@ -70,133 +70,213 @@ export function validateDefinition(definition) {
   }
 }
 
-export function createCampaign(definition, saved = null, random = Math.random,
-    { mode = "normal", clerk = "A. Clerk", now = Date.now } = {}) {
-        validateDefinition(definition);
-        const requested = getMode(mode);
+export function createCampaign(
+  definition,
+  saved = null,
+  random = Math.random,
+  { mode = "normal", clerk = "A. Clerk", now = Date.now } = {},
+) {
+  validateDefinition(definition);
+  const requested = getMode(mode);
 
-        const makeQueues = () => definition.shifts.map(shift => 
-            shuffle(shift.applications.map(item => item.id), random)
-            .slice(0, definition.casesPerShift));
-        
-        let state = {
-            version: 2,
-            runId: makeId(),
-            mode: requested.id,
-            clerk: normalizeClerk(clerk),
-            startedAt: new Date(now()).toISOString(),
-            endedAt: null,
-            phase: "briefing",
-            shiftIndex: 0,
-            caseIndex: 0,
-            queues: makeQueues(),
-            results: [],
-            timer: requested.timed
-                ? { remainingMs: DECISION_TIME, deadline: null }
-                : null
-        };
+  const makeQueues = () =>
+    definition.shifts.map((shift) =>
+      shuffle(
+        shift.applications.map((item) => item.id),
+        random,
+      ).slice(0, definition.casesPerShift),
+    );
 
-        return {
-            startShift,
-            submit,
-            expire,
-            pauseClock,
-            resumeClock,
-            getView,
-            timeRemaining: () => details.timed && state.phase === "inspection"
-            ? remaining()
-            : null,
-            snapshot: () => structuredClone(state)
-        };
+  let state = {
+    version: 2,
+    runId: makeId(),
+    mode: requested.id,
+    clerk: normalizeClerk(clerk),
+    startedAt: new Date(now()).toISOString(),
+    endedAt: null,
+    phase: "briefing",
+    shiftIndex: 0,
+    caseIndex: 0,
+    queues: makeQueues(),
+    results: [],
+    timer: requested.timed
+      ? { remainingMs: DECISION_TIME, deadline: null }
+      : null,
+  };
 
-        const details = getMode(state.mode);
-        const currentShift = () => 
-            definition.shifts[state.shiftIndex % definition.shifts.length];
-        const currentApplication = () => currentShift().application.find(item => 
-            item.id === state.queues[state.shiftIndex][state.caseIndex]);
-        const mistakes = () => state.results.filter(result => !result.correctDecision).length;
-        
-        const remaining = () => !state.timer
-        ? null
-        : state.timer.deadline === null
-            ? state.timer.remainingMs
-            : Math.max(0, Math.min(state.timer.remainingMs, state.timer.deadline - now()));
+  return {
+    startShift,
+    submit,
+    expire,
+    pauseClock,
+    resumeClock,
+    getView,
+    timeRemaining: () =>
+      details.timed && state.phase === "inspection" ? remaining() : null,
+    snapshot: () => structuredClone(state),
+  };
 
-        const freshTimer = active => details.timed
-            ? { remainingMs: DECISION_TIME, deadline: active ? now() + DECISION_TIME : null }
-            : null;
+  const details = getMode(state.mode);
+  const currentShift = () =>
+    definition.shifts[state.shiftIndex % definition.shifts.length];
+  const currentApplication = () =>
+    currentShift().application.find(
+      (item) => item.id === state.queues[state.shiftIndex][state.caseIndex],
+    );
+  const mistakes = () =>
+    state.results.filter((result) => !result.correctDecision).length;
 
-        function startShift() {
-            if (state.phase !== "briefing") return false;
-            state = { ...state, phase: "inspection", timer: freshTimer(true) };
-            return true;
+  const remaining = () =>
+    !state.timer
+      ? null
+      : state.timer.deadline === null
+        ? state.timer.remainingMs
+        : Math.max(
+            0,
+            Math.min(state.timer.remainingMs, state.timer.deadline - now()),
+          );
+
+  const freshTimer = (active) =>
+    details.timed
+      ? {
+          remainingMs: DECISION_TIME,
+          deadline: active ? now() + DECISION_TIME : null,
         }
+      : null;
 
-        function commit(result) {
-            const results = [...state.results, result];
-            const ended = details.endless &&
-                results.filter(item => !item.correctDecision).length === 3;
+  function startShift() {
+    if (state.phase !== "briefing") return false;
+    state = { ...state, phase: "inspection", timer: freshTimer(true) };
+    return true;
+  }
 
-            state = {
+  function commit(result) {
+    const results = [...state.results, result];
+    const ended =
+      details.endless &&
+      results.filter((item) => !item.correctDecision).length === 3;
+
+    state = {
+      ...state,
+      phase: "feedback",
+      results,
+      endedAt: ended ? new Date(now()).toISOString() : null,
+      timer: details.timed
+        ? { remainingMs: remaining(), deadline: null }
+        : null,
+    };
+
+    return structuredClone(result);
+  }
+
+  function expire() {
+    if (state.phase !== "inspection" || !details.timed || remaining() > 0)
+      return null;
+    return commit(
+      assessInspection(currentShift(), currentApplication(), "timeout"),
+    );
+  }
+
+  function submit(decision, reasons = []) {
+    if (state.phase !== "inspection") return null;
+    if (details.timed && remaining() <= 0) return expire();
+    if (!["approve", "reject"].includes(decision))
+      throw new Error("Unknown decision.");
+
+    return commit(
+      assessInspection(currentShift(), currentApplication(), decision, reasons),
+    );
+  }
+
+  function advance() {
+    if (state.phase === "feedback") {
+      if (state.endedAt) {
+        state = { ...state, phase: "complete" };
+      } else {
+        state =
+          state.caseIndex + 1 < definition.casesPerShift
+            ? {
                 ...state,
-                phase: "feedback",
-                results,
-                endedAt: ended ? new Date(now()).toISOString() : null,
-                timer: details.timed
-                    ? { remainingMs: remaining(), deadline: null }
-                    : null
-            };
+                caseIndex: state.caseIndex + 1,
+                phase: "inspection",
+                timer: freshTimer(true),
+              }
+            : { ...state, phase: "shift-report", timer: freshTimer(false) };
+      }
+    } else if (state.phase === "shift-report") {
+      const next = state.shiftIndex + 1;
 
-            return structuredClone(result);
-        }
+      if (!details.endless && next === definition.shifts.length) {
+        state = {
+          ...state,
+          phase: "complete",
+          endedAt: new Date(now()).toISOString(),
+        };
+      } else {
+        const queues =
+          next === state.queues.length
+            ? [...state.queues, ...makeQueues()]
+            : state.queues;
 
-        function expire() {
-            if (state.phase !== "inspection" || !details.timed || remaining() > 0) return null;
-            return commit(assessInspection(currentShift(), currentApplication(), "timeout"));
-        }
-
-        function submit(decision, reasons = []) {
-            if (state.phase !== "inspection") return null;
-            if (details.timed && remaining() <= 0) return expire();
-            if (!["approve", "reject"].includes(decision)) throw new Error("Unknown decision.");
-
-            return commit(assessInspection(currentShift(), currentApplication(), decision, reasons));
-        }
-
-        function pauseClock() {
-            if (!details.timed || state.phase !== "inspection") return;
-                state = { ...state, timer: { remainingMs: remaining(), deadline: null } };
-        }
-
-        function resumeClock() {
-            if (!details.timed || state.phase !== "inspection" || state.timer.deadline !== null) return;
-            state = { ...state, timer: { ...state.timer, deadline: now() + state.timer.remainingMs } };
-        }
-
-        function getView() {
-            const shift = currentShift();
-            const shiftResults = state.results.slice(
-                state.shiftIndex * definition.casesPerShift,
-                (state.shiftIndex + 1) * definition.casesPerShift
-            );
-
-            return structuredClone({
-                ...state,
-                modeDetails: details,
-                shift,
-                application: currentApplication(),
-                shiftResults,
-                queue: state.queues[state.shiftIndex].map(id =>
-                    shift.applications.find(item => item.id === id)),
-                totals: calculateTotals(state.results),
-                shiftTotals: calculateTotals(shiftResults),
-                mistakes: mistakes(),
-                warningsLeft: details.endless ? Math.max(0, 3 - mistakes()): null,
-                runEnded: Boolean(state.endedAt),
-                lastResult: state.results.at(-1) ?? null,
-                shiftCount: details.endless ? null : definition.shifts.length,
-                casesPerShift: definition.casesPerShift,
-                restored: false
-            });
-        }
+        state = {
+          ...state,
+          shiftIndex: next,
+          caseIndex: 0,
+          phase: "briefing",
+          queues,
+          timer: freshTimer(false),
+        };
+      }
+    } else {
+      return false;
     }
+
+    return true;
+  }
+
+  function pauseClock() {
+    if (!details.timed || state.phase !== "inspection") return;
+    state = { ...state, timer: { remainingMs: remaining(), deadline: null } };
+  }
+
+  function resumeClock() {
+    if (
+      !details.timed ||
+      state.phase !== "inspection" ||
+      state.timer.deadline !== null
+    )
+      return;
+    state = {
+      ...state,
+      timer: { ...state.timer, deadline: now() + state.timer.remainingMs },
+    };
+  }
+
+  function getView() {
+    const shift = currentShift();
+    const shiftResults = state.results.slice(
+      state.shiftIndex * definition.casesPerShift,
+      (state.shiftIndex + 1) * definition.casesPerShift,
+    );
+
+    return structuredClone({
+      ...state,
+      modeDetails: details,
+      shift,
+      application: currentApplication(),
+      shiftResults,
+      queue: state.queues[state.shiftIndex].map((id) =>
+        shift.applications.find((item) => item.id === id),
+      ),
+      totals: calculateTotals(state.results),
+      shiftTotals: calculateTotals(shiftResults),
+      mistakes: mistakes(),
+      warningsLeft: details.endless ? Math.max(0, 3 - mistakes()) : null,
+      runEnded: Boolean(state.endedAt),
+      lastResult: state.results.at(-1) ?? null,
+      shiftCount: details.endless ? null : definition.shifts.length,
+      casesPerShift: definition.casesPerShift,
+      restored: false,
+    });
+  }
+}
