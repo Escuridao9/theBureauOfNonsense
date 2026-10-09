@@ -97,6 +97,41 @@ export function createCampaign(definition, saved = null, random = Math.random,
         };
 
         return {
+            getView,
             snapshot: () => structuredClone(state)
         };
+
+        const details = getMode(state.mode);
+        const currentShift = () => 
+            definition.shifts[state.shiftIndex % definition.shifts.length];
+        const currentApplication = () => currentShift().application.find(item => 
+            item.id === state.queues[state.shiftIndex][state.caseIndex]);
+        const mistakes = () => state.results.filter(result => !result.correctDecision).length;
+        
+        function getView() {
+            const shift = currentShift();
+            const shiftResults = state.results.slice(
+                state.shiftIndex * definition.casesPerShift,
+                (state.shiftIndex + 1) * definition.casesPerShift
+            );
+
+            return structuredClone({
+                ...state,
+                modeDetails: details,
+                shift,
+                application: currentApplication(),
+                shiftResults,
+                queue: state.queues[state.shiftIndex].map(id =>
+                    shift.applications.find(item => item.id === id)),
+                totals: calculateTotals(state.results),
+                shiftTotals: calculateTotals(shiftResults),
+                mistakes: mistakes(),
+                warningsLeft: details.endless ? Math.max(0, 3 - mistakes()): null,
+                runEnded: Boolean(state.endedAt),
+                lastResult: state.results.at(-1) ?? null,
+                shiftCount: details.endless ? null : definition.shifts.length,
+                casesPerShift: definition.casesPerShift,
+                restored: false
+            });
+        }
     }
