@@ -315,6 +315,180 @@
           }
         }
       ]
+    },
+    {
+      "id": "haunting",
+      "name": "Department of After-Hours Phenomena",
+      "permit": "Residential haunting",
+      "form": "RH-09",
+      "date": "1984-10-09",
+      "intro": "The living have rights. So do the neighbours.",
+      "memo": "A heartfelt moan remains a noise. Please measure it accordingly.",
+      "briefingTitle": "The night shift, on paper.",
+      "briefing": "Your final assignment is residential haunting. Four regulations now apply. Check the start time carefully: our permitted window crosses midnight, from 22:00 through 05:00. Being deceased does not exempt applicants from obtaining consent.",
+      "fields": [
+        {
+          "key": "startTime",
+          "label": "Proposed start time",
+          "format": "time"
+        },
+        {
+          "key": "noise",
+          "label": "Declared noise level",
+          "format": "number",
+          "unit": "dB"
+        },
+        {
+          "key": "consent",
+          "label": "Property owner consent",
+          "format": "boolean"
+        },
+        {
+          "key": "duration",
+          "label": "Requested duration",
+          "format": "number",
+          "unit": "minutes"
+        }
+      ],
+      "rules": [
+        {
+          "id": "RH-01",
+          "title": "Observe haunting hours.",
+          "description": "The start time must be between 22:00 and 05:00, inclusive. The window crosses midnight.",
+          "type": "timeWindow",
+          "field": "startTime",
+          "fieldLabel": "Proposed start time",
+          "start": "22:00",
+          "end": "05:00"
+        },
+        {
+          "id": "RH-02",
+          "title": "Keep the moaning down.",
+          "description": "Declared noise must be 30 dB or less. Chains count.",
+          "type": "maxNumber",
+          "field": "noise",
+          "fieldLabel": "Declared noise level",
+          "maximum": 30,
+          "unit": "dB"
+        },
+        {
+          "id": "RH-03",
+          "title": "Obtain consent.",
+          "description": "The property owner must have provided consent. A frightened nod does not count.",
+          "type": "equals",
+          "field": "consent",
+          "fieldLabel": "Property owner consent",
+          "required": true
+        },
+        {
+          "id": "RH-04",
+          "title": "Do not overstay.",
+          "description": "The requested haunting must last 60 minutes or less.",
+          "type": "maxNumber",
+          "field": "duration",
+          "fieldLabel": "Requested duration",
+          "maximum": 60,
+          "unit": "minutes"
+        }
+      ],
+      "applications": [
+        {
+          "id": "RH-301",
+          "name": "Agnes Rattle",
+          "species": "Ghost / former librarian",
+          "quote": "I shall haunt in a whisper. The books deserve a quiet evening.",
+          "fields": {
+            "startTime": "23:00",
+            "noise": 18,
+            "consent": true,
+            "duration": 45
+          }
+        },
+        {
+          "id": "RH-302",
+          "name": "Mortimer Clank",
+          "species": "Spectre / chain collector",
+          "quote": "The chains are part of my cultural heritage.",
+          "fields": {
+            "startTime": "01:15",
+            "noise": 48,
+            "consent": true,
+            "duration": 30
+          }
+        },
+        {
+          "id": "RH-303",
+          "name": "Lydia Dawn",
+          "species": "Ghost / early riser",
+          "quote": "The morning light is simply better for appearing in mirrors.",
+          "fields": {
+            "startTime": "06:00",
+            "noise": 12,
+            "consent": true,
+            "duration": 20
+          }
+        },
+        {
+          "id": "RH-304",
+          "name": "Rupert Uninvited",
+          "species": "Poltergeist / independent practitioner",
+          "quote": "Nobody explicitly asked me to leave. I consider that very encouraging.",
+          "fields": {
+            "startTime": "00:30",
+            "noise": 26,
+            "consent": false,
+            "duration": 50
+          }
+        },
+        {
+          "id": "RH-305",
+          "name": "Eveline Still",
+          "species": "Ghost / punctual professional",
+          "quote": "I have written down the exact limits. I intend to meet them.",
+          "fields": {
+            "startTime": "05:00",
+            "noise": 30,
+            "consent": true,
+            "duration": 60
+          }
+        },
+        {
+          "id": "RH-306",
+          "name": "Oswald Echo",
+          "species": "Phantom / repeat visitor",
+          "quote": "One hour is barely enough time to get into the atmosphere.",
+          "fields": {
+            "startTime": "22:00",
+            "noise": 20,
+            "consent": true,
+            "duration": 75
+          }
+        },
+        {
+          "id": "RH-307",
+          "name": "Cora Candlewick",
+          "species": "Ghost / candle enthusiast",
+          "quote": "I will extinguish the candles before I leave. I am not unreasonable.",
+          "fields": {
+            "startTime": "22:00",
+            "noise": 8,
+            "consent": true,
+            "duration": 35
+          }
+        },
+        {
+          "id": "RH-308",
+          "name": "Ambrose Excess",
+          "species": "Poltergeist / enthusiastic newcomer",
+          "quote": "If one rattling cupboard is unsettling, imagine twelve.",
+          "fields": {
+            "startTime": "21:59",
+            "noise": 52,
+            "consent": false,
+            "duration": 90
+          }
+        }
+      ]
     }
   ]
 }
