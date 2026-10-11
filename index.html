@@ -145,12 +145,35 @@
               <span id="clerk-name">A. Clerk</span>
             </p>
           </div>
+          <div id="desk-layout" class="desk-layout" hidden>
+            <aside class="rulebook" aria-labelledby="rulebook-heading">
+              <details id="rulebook-panel" open>
+                <summary class="binder-label">The rules, apparently.</summary>
+                <div class="rulebook-content">
+                  <p class="eyebrow">Read before stamping</p>
+                  <h2 id="rulebook-heading">The rulebook.</h2>
+                  <p id="rulebook-intro" class="rulebook-intro"></p>
+                  <ol id="rules" class="rules-list"></ol>
+                  <div class="rulebook-footnote">
+                    <span class="small-cross" aria-hidden="true">+</span>
+                    <p>
+                      Every regulation must be met.<br />An expiry date includes
+                      that day.
+                    </p>
+                  </div>
+                </div>
+              </details>
+            </aside>
+          </div>
         </section>
       </main>
       <footer id="desk-footer" class="bureau-footer" hidden>
-  <span>BUREAU OF NONSENSE <span class="footer-divider">/</span> CLERK TERMINAL 04</span>
-  <span>Every stamp leaves a paper trail.</span>
-</footer>
+        <span
+          >BUREAU OF NONSENSE <span class="footer-divider">/</span> CLERK
+          TERMINAL 04</span
+        >
+        <span>Every stamp leaves a paper trail.</span>
+      </footer>
     </div>
 
     <dialog
@@ -386,5 +409,12 @@
       preload="auto"
       aria-hidden="true"
     ></audio>
+    <template id="rule-template">
+  <li class="rule-card">
+    <span class="rule-code"></span>
+    <h3 class="rule-title"></h3>
+    <p class="rule-description"></p>
+  </li>
+</template>
   </body>
 </html>

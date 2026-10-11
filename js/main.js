@@ -1,7 +1,7 @@
 import { createStorage } from "./storage.js";
 import { createAudioController } from "./audio.js";
 import { createCampaign, validateDefinition } from "./game.js";
-import { formatDate } from "./rules.js";
+import { createInterface } from "./ui.js";
 
 const storage = createStorage();
 
@@ -12,6 +12,7 @@ let ready = false;
 let loading = false;
 let campaign = null;
 let screen = "menu";
+let ui;
 
 const audio = createAudioController({
     atmosphere: element("atmosphere-audio"),
@@ -108,6 +109,7 @@ async function loadCampaign() {
 
     definition = await response.json();
     validateDefinition(definition);
+    ui = createInterface();
 
     ready = true;
     element("new-campaign-button").disabled = false;
@@ -158,15 +160,8 @@ function openDesk() {
   element("skip-link").setAttribute("href", "#department-name");
   campaign.resumeClock();
 
-  const view = campaign.getView();
+  ui.render(campaign.getView());
 
-  element("shift-number").textContent =
-    `SHIFT ${String(view.shiftIndex + 1).padStart(2, "0")}`;
-  element("department-name").textContent = view.shift.name;
-  element("office-date").textContent = formatDate(view.shift.date);
-  element("score").textContent = String(view.totals.points).padStart(3, "0");
-  element("mode-name").textContent = view.modeDetails.name;
-  element("clerk-name").textContent = view.clerk;
   element("department-name").focus({ preventScroll: true });
 }
 
