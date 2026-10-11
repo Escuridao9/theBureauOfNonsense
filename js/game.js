@@ -70,6 +70,129 @@ export function validateDefinition(definition) {
   }
 }
 
+function legacyId(queues) {
+  let hash = 2166136261;
+
+  for (const character of JSON.stringify(queues)) {
+    hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
+  }
+
+  return `legacy-${hash >>> 0}`;
+}
+
+function restoreState(definition, saved, now) {
+  try {
+    if (!saved || ![1, 2].includes(saved.version) || !PHASES.includes(saved.phase) ||
+        !Number.isInteger(saved.shiftIndex) || saved.shiftIndex < 0 ||
+        !Number.isInteger(saved.caseIndex) || saved.caseIndex < 0 ||
+        saved.caseIndex >= definition.casesPerShift ||
+        !Array.isArray(saved.queues) || !Array.isArray(saved.results)) return null;
+
+    if (saved.version === 2 && typeof saved.mode !== "string") return null;
+
+    const mode = getMode(saved.version === 1 ? "normal" : saved.mode);
+    const expectedQueues = mode.endless
+      ? (Math.floor(saved.shiftIndex / definition.shifts.length) + 1) * definition.shifts.length
+      : definition.shifts.length;
+
+    if (saved.queues.length !== expectedQueues ||
+        saved.shiftIndex >= saved.queues.length) return null;
+
+    for (let index = 0; index < saved.queues.length; index += 1) {
+      const queue = saved.queues[index];
+      const shift = definition.shifts[index % definition.shifts.length];
+
+      if (!Array.isArray(queue) || queue.length !== definition.casesPerShift ||
+          new Set(queue).size !== queue.length ||
+          queue.some(id => !shift.applications.some(item => item.id === id))) return null;
+    }
+
+        if (saved.phase === "briefing" && saved.caseIndex !== 0) return null;
+    if (saved.phase === "shift-report" &&
+        saved.caseIndex !== definition.casesPerShift - 1) return null;
+    if (saved.phase === "complete" && !mode.endless &&
+        (saved.shiftIndex !== definition.shifts.length - 1 ||
+         saved.caseIndex !== definition.casesPerShift - 1)) return null;
+
+    const expectedCount = saved.shiftIndex * definition.casesPerShift + saved.caseIndex +
+      (["feedback", "shift-report", "complete"].includes(saved.phase) ? 1 : 0);
+
+    if (saved.results.length !== expectedCount) return null;
+
+    const results = saved.results.map((record, index) => {
+      const shiftIndex = Math.floor(index / definition.casesPerShift);
+      const shift = definition.shifts[shiftIndex % definition.shifts.length];
+      const caseId = saved.queues[shiftIndex][index % definition.casesPerShift];
+
+      if (record.shiftId !== shift.id || record.caseId !== caseId ||
+          !Array.isArray(record.reasons) ||
+          (record.decision === "timeout" && !mode.timed)) {
+        throw new Error("The saved paper trail is inconsistent.");
+      }
+
+      return assessInspection(
+        shift,
+        shift.applications.find(item => item.id === caseId),
+        record.decision,
+        record.reasons
+      );
+    });
+
+    const mistakes = results.filter(result => !result.correctDecision).length;
+
+    if (mode.endless && (mistakes > 3 ||
+        (mistakes === 3 && !["feedback", "complete"].includes(saved.phase)) ||
+        (mistakes < 3 && saved.phase === "complete"))) return null;
+    if (mode.endless && mistakes === 3 && results.at(-1).correctDecision) return null;
+
+    const ended = saved.phase === "complete" || (mode.endless && mistakes === 3);
+    const legacy = saved.version === 1;
+    const startedAt = legacy ? new Date(now).toISOString() : saved.startedAt;
+    const endedAt = legacy ? ended ? startedAt : null : saved.endedAt;
+
+    if (!Number.isFinite(Date.parse(startedAt)) ||
+        (ended && (!Number.isFinite(Date.parse(endedAt)) ||
+          Date.parse(endedAt) < Date.parse(startedAt))) ||
+        (!ended && endedAt !== null)) return null;
+
+    const runId = legacy ? legacyId(saved.queues) : saved.runId;
+
+    if (typeof runId !== "string" || !runId.length || runId.length > 96 ||
+        (!legacy && typeof saved.clerk !== "string")) return null;
+
+    let timer = null;
+
+    if (mode.timed) {
+      timer = saved.timer;
+
+      if (!timer || !Number.isFinite(timer.remainingMs) ||
+          timer.remainingMs < 0 || timer.remainingMs > DECISION_TIME ||
+          (timer.deadline !== null && (!Number.isFinite(timer.deadline) ||
+            timer.deadline > now + DECISION_TIME)) ||
+          (saved.phase !== "inspection" && timer.deadline !== null)) return null;
+
+      timer = { remainingMs: timer.remainingMs, deadline: timer.deadline };
+    } else if (!legacy && saved.timer !== null) return null;
+
+    return {
+      version: 2,
+      runId,
+      clerk: normalizeClerk(legacy ? "A. Clerk" : saved.clerk),
+      mode: mode.id,
+      startedAt,
+      endedAt,
+      phase: saved.phase,
+      shiftIndex: saved.shiftIndex,
+      caseIndex: saved.caseIndex,
+      queues: structuredClone(saved.queues),
+      results,
+      timer
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function createCampaign(
   definition,
   saved = null,
@@ -79,6 +202,8 @@ export function createCampaign(
   validateDefinition(definition);
   const requested = getMode(mode);
 
+  const restored = restoreState(definition, saved, now());
+
   const makeQueues = () =>
     definition.shifts.map((shift) =>
       shuffle(
@@ -87,7 +212,7 @@ export function createCampaign(
       ).slice(0, definition.casesPerShift),
     );
 
-  let state = {
+  let state = restored ?? {
     version: 2,
     runId: makeId(),
     mode: requested.id,
@@ -276,7 +401,7 @@ export function createCampaign(
       lastResult: state.results.at(-1) ?? null,
       shiftCount: details.endless ? null : definition.shifts.length,
       casesPerShift: definition.casesPerShift,
-      restored: false,
+      restored: Boolean(restored),
     });
   }
 }
