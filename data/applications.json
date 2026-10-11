@@ -13,10 +13,23 @@
       "briefingTitle": "Welcome to the fourth floor.",
       "briefing": "Your first assignment is rooftop parking. Expect large vehicles, larger egos, and fireproofing certificates. The regulations are on your left. Please familiarise yourself with them before anything lands.",
       "fields": [
-        { "key": "requestedZone", "label": "Requested parking zone", "format": "text" },
-        { "key": "weight", "label": "Declared weight", "format": "number", "unit": "kg" },
+        {
+          "key": "requestedZone",
+          "label": "Requested parking zone",
+          "format": "text"
+        },
+        {
+          "key": "weight",
+          "label": "Declared weight",
+          "format": "number",
+          "unit": "kg"
+        },
         { "key": "coverage", "label": "Authorised zones", "format": "list" },
-        { "key": "fireproofing", "label": "Fireproofing valid until", "format": "date" }
+        {
+          "key": "fireproofing",
+          "label": "Fireproofing valid until",
+          "format": "date"
+        }
       ],
       "rules": [
         {
@@ -142,6 +155,163 @@
             "weight": 124,
             "coverage": ["Rooftop", "Ground"],
             "fireproofing": "1984-11-02"
+          }
+        }
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Department of Inconvenient Travel",
+      "permit": "Temporary teleportation",
+      "form": "TT-07",
+      "date": "1984-10-08",
+      "intro": "Arriving instantly still requires advance permission.",
+      "memo": "A destination that sounds approximately correct is not an authorised destination.",
+      "briefingTitle": "Mind the destination.",
+      "briefing": "Today you will process temporary teleportation requests. Please note that the Moon remains outside our service area. The authorised destinations and luggage limit are printed in the rulebook.",
+      "fields": [
+        {
+          "key": "destination",
+          "label": "Requested destination",
+          "format": "text"
+        },
+        {
+          "key": "luggage",
+          "label": "Declared luggage",
+          "format": "number",
+          "unit": "kg"
+        },
+        {
+          "key": "certificate",
+          "label": "Travel certificate valid until",
+          "format": "date"
+        },
+        { "key": "carrier", "label": "Registered carrier", "format": "text" }
+      ],
+      "rules": [
+        {
+          "id": "TT-01",
+          "title": "Stay inside the service area.",
+          "description": "Only Old Town, Railway Station, and Post Office are authorised destinations.",
+          "type": "oneOf",
+          "field": "destination",
+          "fieldLabel": "Requested destination",
+          "allowed": ["Old Town", "Railway Station", "Post Office"]
+        },
+        {
+          "id": "TT-02",
+          "title": "Pack sensibly.",
+          "description": "Declared luggage must be 40 kg or less. This includes emotional baggage if packed.",
+          "type": "maxNumber",
+          "field": "luggage",
+          "fieldLabel": "Declared luggage",
+          "maximum": 40,
+          "unit": "kg"
+        },
+        {
+          "id": "TT-03",
+          "title": "Travel on a valid certificate.",
+          "description": "The travel certificate must be valid on the office date shown above.",
+          "type": "dateNotBefore",
+          "field": "certificate",
+          "fieldLabel": "Travel certificate valid until"
+        }
+      ],
+      "applications": [
+        {
+          "id": "TT-201",
+          "name": "Edmund Elsewhere",
+          "species": "Wizard / visiting lecturer",
+          "quote": "The lecture begins in three minutes. I was meant to leave yesterday.",
+          "fields": {
+            "destination": "Old Town",
+            "luggage": 28,
+            "certificate": "1984-11-01",
+            "carrier": "Blink & You Miss It"
+          }
+        },
+        {
+          "id": "TT-202",
+          "name": "Nora Pocket",
+          "species": "Human / stamp enthusiast",
+          "quote": "I am transporting only the essential stamps. All forty kilograms of them.",
+          "fields": {
+            "destination": "Post Office",
+            "luggage": 40,
+            "certificate": "1984-10-08",
+            "carrier": "Municipal Vanishing Service"
+          }
+        },
+        {
+          "id": "TT-203",
+          "name": "Silas Moonsworth",
+          "species": "Astronomer / optimistic applicant",
+          "quote": "The Moon is technically above the town. Surely that counts.",
+          "fields": {
+            "destination": "Moon",
+            "luggage": 12,
+            "certificate": "1984-12-21",
+            "carrier": "Blink & You Miss It"
+          }
+        },
+        {
+          "id": "TT-204",
+          "name": "Viola Trunk",
+          "species": "Vampire / travelling musician",
+          "quote": "The coffin is carry-on. The piano is also carry-on.",
+          "fields": {
+            "destination": "Railway Station",
+            "luggage": 92,
+            "certificate": "1984-11-18",
+            "carrier": "Municipal Vanishing Service"
+          }
+        },
+        {
+          "id": "TT-205",
+          "name": "Basil Yesterday",
+          "species": "Time traveller / chronically late",
+          "quote": "My certificate was valid at the time I completed the application.",
+          "fields": {
+            "destination": "Old Town",
+            "luggage": 5,
+            "certificate": "1984-10-07",
+            "carrier": "A Moment Ago Ltd."
+          }
+        },
+        {
+          "id": "TT-206",
+          "name": "Clementine Fold",
+          "species": "Origami courier / express delivery",
+          "quote": "I have folded my suitcase to meet your requirements.",
+          "fields": {
+            "destination": "Railway Station",
+            "luggage": 3,
+            "certificate": "1984-10-20",
+            "carrier": "Blink & You Miss It"
+          }
+        },
+        {
+          "id": "TT-207",
+          "name": "Dorian Approximate",
+          "species": "Human / amateur geographer",
+          "quote": "The Oldest Town must surely be older than Old Town. It should qualify.",
+          "fields": {
+            "destination": "Oldest Town",
+            "luggage": 45,
+            "certificate": "1984-10-02",
+            "carrier": "Almost There Transit"
+          }
+        },
+        {
+          "id": "TT-208",
+          "name": "Rosalind Finch",
+          "species": "Sorcerer / weekend visitor",
+          "quote": "Please ensure the pigeons do not arrive with me this time.",
+          "fields": {
+            "destination": "Post Office",
+            "luggage": 39.5,
+            "certificate": "1985-01-01",
+            "carrier": "Municipal Vanishing Service"
           }
         }
       ]
