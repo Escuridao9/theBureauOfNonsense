@@ -164,40 +164,73 @@
                 </div>
               </details>
             </aside>
-            <section class="application-area" aria-labelledby="application-title">
-  <div class="paper-slot">
-    <article id="application" class="application-paper" tabindex="-1">
-      <div class="paper-topline">
-        <span id="form-number">FORM —</span>
-        <span>ORIGINAL COPY</span>
-      </div>
-      <div class="application-heading">
-        <div>
-          <p class="eyebrow">Application for authorisation</p>
-          <h2 id="application-title"></h2>
-        </div>
-        <span class="document-seal" aria-hidden="true">BN<br><small>1984</small></span>
-      </div>
-      <div class="applicant-identity">
-        <div id="applicant-initials" class="initials" aria-hidden="true"></div>
-        <div>
-          <span class="field-label">Applicant</span>
-          <h3 id="applicant-name"></h3>
-          <p id="applicant-species"></p>
-        </div>
-      </div>
-      <dl id="application-fields" class="application-fields"></dl>
-      <div class="applicant-statement">
-        <span class="field-label">Applicant's statement</span>
-        <blockquote id="applicant-quote"></blockquote>
-      </div>
-      <div class="paper-bottomline">
-        <span id="application-reference"></span>
-        <span>Do not fold. It upsets the form.</span>
-      </div>
-    </article>
-  </div>
-</section>
+            <section
+              class="application-area"
+              aria-labelledby="application-title"
+            >
+              <div class="paper-slot">
+                <article
+                  id="application"
+                  class="application-paper"
+                  tabindex="-1"
+                >
+                  <div class="paper-topline">
+                    <span id="form-number">FORM —</span>
+                    <span>ORIGINAL COPY</span>
+                  </div>
+                  <div class="application-heading">
+                    <div>
+                      <p class="eyebrow">Application for authorisation</p>
+                      <h2 id="application-title"></h2>
+                    </div>
+                    <span class="document-seal" aria-hidden="true"
+                      >BN<br /><small>1984</small></span
+                    >
+                  </div>
+                  <div class="applicant-identity">
+                    <div
+                      id="applicant-initials"
+                      class="initials"
+                      aria-hidden="true"
+                    ></div>
+                    <div>
+                      <span class="field-label">Applicant</span>
+                      <h3 id="applicant-name"></h3>
+                      <p id="applicant-species"></p>
+                    </div>
+                  </div>
+                  <dl id="application-fields" class="application-fields"></dl>
+                  <div class="applicant-statement">
+                    <span class="field-label">Applicant's statement</span>
+                    <blockquote id="applicant-quote"></blockquote>
+                  </div>
+                  <div class="paper-bottomline">
+                    <span id="application-reference"></span>
+                    <span>Do not fold. It upsets the form.</span>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <aside class="in-tray" aria-labelledby="queue-heading">
+              <div class="tray-heading">
+                <p class="eyebrow">On your desk</p>
+                <h2 id="queue-heading">The in-tray.</h2>
+              </div>
+              <div class="case-counter">
+                <span id="case-number">01</span>
+                <span class="case-total"
+                  >OF <span id="case-total">06</span><br />APPLICATIONS</span
+                >
+              </div>
+              <ol id="queue" class="queue-list"></ol>
+              <div class="shift-notice">
+                <span class="notice-label">A note from upstairs</span>
+                <p id="shift-memo"></p>
+              </div>
+              <p id="save-status" class="save-status" role="status">
+                Progress is available during this visit.
+              </p>
+            </aside>
           </div>
         </section>
       </main>
@@ -444,11 +477,21 @@
       aria-hidden="true"
     ></audio>
     <template id="rule-template">
-  <li class="rule-card">
-    <span class="rule-code"></span>
-    <h3 class="rule-title"></h3>
-    <p class="rule-description"></p>
-  </li>
-</template>
+      <li class="rule-card">
+        <span class="rule-code"></span>
+        <h3 class="rule-title"></h3>
+        <p class="rule-description"></p>
+      </li>
+    </template>
+    <template id="queue-template">
+      <li class="queue-item">
+        <span class="queue-number"></span>
+        <div>
+          <span class="queue-name"></span>
+          <span class="queue-status"></span>
+        </div>
+        <span class="queue-result" aria-hidden="true"></span>
+      </li>
+    </template>
   </body>
 </html>

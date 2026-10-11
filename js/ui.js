@@ -52,6 +52,35 @@ export function createInterface() {
   element("application-fields").replaceChildren(...fields);
 }
 
+function renderQueue(view) {
+  text("case-number", pad(view.caseIndex + 1));
+  text("case-total", pad(view.queue.length));
+
+  const items = view.queue.map((application, index) => {
+    const item = copyTemplate("queue-template");
+    const result = view.shiftResults[index];
+    const active = !result && index === view.caseIndex;
+
+    item.classList.toggle("current", active);
+    item.classList.toggle("incorrect", Boolean(result && !result.correctDecision));
+
+    if (active) item.setAttribute("aria-current", "step");
+
+    item.querySelector(".queue-number").textContent = pad(index + 1);
+    item.querySelector(".queue-name").textContent = application.name;
+    item.querySelector(".queue-status").textContent = result
+      ? `Filed · ${result.points} points`
+      : active ? "Awaiting your stamp" : "Waiting";
+    item.querySelector(".queue-result").textContent = result
+      ? (result.correctDecision ? "+" : "!")
+      : "";
+
+    return item;
+  });
+
+  element("queue").replaceChildren(...items);
+}
+
   function render(view) {
     element("desk-layout").hidden = false;
     text("shift-number", `SHIFT ${pad(view.shiftIndex + 1)}`);
@@ -61,8 +90,10 @@ export function createInterface() {
     text("mode-name", view.modeDetails.name);
     text("clerk-name", view.clerk);
     text("rulebook-intro", view.shift.intro);
+    text("shift-memo", view.shift.memo);
     renderRules(view.shift);
     renderDocument(view.shift, view.application);
+    renderQueue(view);
   }
 
   return { render };
