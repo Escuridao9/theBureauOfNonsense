@@ -218,9 +218,19 @@
                 >
                   <span>Approve</span>
                 </button>
+                <button
+                  id="reject-button"
+                  class="stamp-button reject-button"
+                  type="button"
+                >
+                  <span>Reject</span>
+                </button>
               </div>
 
-              <p class="decision-hint">Approve only if every rule is met.</p>
+              <p class="decision-hint">
+                Approve only if every rule is met. For a rejection, identify
+                every broken rule.
+              </p>
             </section>
             <aside class="in-tray" aria-labelledby="queue-heading">
               <div class="tray-heading">
@@ -549,6 +559,41 @@
       </div>
     </dialog>
 
+    <dialog
+      id="reject-dialog"
+      class="bureau-dialog"
+      aria-labelledby="reject-title"
+    >
+      <p class="eyebrow">Refusal of authorisation</p>
+      <h2 id="reject-title">Cite the regulations.</h2>
+      <p class="dialog-lead">Select every rule this application breaks.</p>
+
+      <form id="rejection-form">
+        <fieldset>
+          <legend class="sr-only">Broken regulations</legend>
+          <div id="rejection-reasons" class="reason-options"></div>
+        </fieldset>
+
+        <p id="rejection-error" class="form-error" role="status" hidden>
+          Select at least one regulation.
+        </p>
+
+        <div class="dialog-actions">
+          <button
+            id="cancel-rejection-button"
+            class="secondary-button"
+            type="button"
+          >
+            Back to desk
+          </button>
+
+          <button class="primary-button danger-button" type="submit">
+            Stamp rejected
+          </button>
+        </div>
+      </form>
+    </dialog>
+
     <audio
       id="atmosphere-audio"
       src="assets/audio/office-room-tone.mp3"
@@ -597,6 +642,16 @@
         <span class="explanation-code"></span>
         <p></p>
       </div>
+    </template>
+    <template id="reason-template">
+      <label class="reason-option">
+        <input type="checkbox" name="reasons" />
+
+        <span>
+          <strong class="reason-title"></strong>
+          <span class="reason-description"></span>
+        </span>
+      </label>
     </template>
   </body>
 </html>

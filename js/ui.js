@@ -226,7 +226,10 @@ export function createInterface() {
     renderRules(view.shift);
     renderDocument(view.shift, view.application);
     renderQueue(view);
-    element("approve-button").disabled = view.phase !== "inspection";
+    const inspecting = view.phase === "inspection";
+
+    element("approve-button").disabled = !inspecting;
+    element("reject-button").disabled = !inspecting;
 
     if (view.phase === "briefing") {
       text("briefing-shift", `SHIFT ${pad(view.shiftIndex + 1)}`);
@@ -246,5 +249,25 @@ export function createInterface() {
     }
   }
 
-  return { render };
+  function openRejection(view) {
+    element("rejection-form").reset();
+    element("rejection-error").hidden = true;
+
+    const choices = view.shift.rules.map((rule) => {
+      const option = copyTemplate("reason-template");
+
+      option.querySelector("input").value = rule.id;
+      option.querySelector(".reason-title").textContent =
+        `${rule.id} · ${rule.title}`;
+      option.querySelector(".reason-description").textContent =
+        rule.description;
+
+      return option;
+    });
+
+    element("rejection-reasons").replaceChildren(...choices);
+    element("reject-dialog").showModal();
+  }
+
+  return { render, openRejection };
 }

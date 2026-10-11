@@ -1426,6 +1426,18 @@ details[open] > .binder-label::after {
   box-shadow: 3px 6px 0 #172e2a;
 }
 
+.reject-button {
+  border-color: #eeb49b;
+  color: #fff5e9;
+  background: #9b4e3d;
+  transform: rotate(0.8deg);
+}
+
+.reject-button:hover:not(:disabled) {
+  background: #ad5d48;
+  box-shadow: 3px 6px 0 #172e2a;
+}
+
 .stamp-button:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 1px 2px 0 #172e2a;

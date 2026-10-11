@@ -163,7 +163,24 @@ function finishInspection(decision, reasons = []) {
 
   if (!result.timedOut) audio.playStamp();
 
+  if (element("reject-dialog").open) {
+    element("reject-dialog").close();
+  }
+
   refresh();
+}
+
+function openRejection() {
+  if (screen !== "desk" || campaign?.getView().phase !== "inspection") {
+    return;
+  }
+
+  if (campaign.expire()) {
+    refresh();
+    return;
+  }
+
+  ui.openRejection(campaign.getView());
 }
 
 function advance() {
@@ -262,5 +279,24 @@ element("approve-button").addEventListener("click", () => {
 });
 
 element("next-applicant-button").addEventListener("click", advance);
+
+element("reject-button").addEventListener("click", openRejection);
+
+element("cancel-rejection-button").addEventListener("click", () => {
+  element("reject-dialog").close();
+});
+
+element("rejection-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const reasons = new FormData(event.currentTarget).getAll("reasons");
+
+  if (!reasons.length) {
+    element("rejection-error").hidden = false;
+    return;
+  }
+
+  finishInspection("reject", reasons);
+});
 
 loadCampaign();
