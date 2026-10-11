@@ -155,6 +155,27 @@ function renderMenu() {
     : "No campaign on file. Your first shift awaits.";
 }
 
+function finishInspection(decision, reasons = []) {
+  if (screen !== "desk") return;
+
+  const result = campaign?.submit(decision, reasons);
+  if (!result) return;
+
+  if (!result.timedOut) audio.playStamp();
+
+  refresh();
+}
+
+function advance() {
+  if (screen !== "desk" || !campaign?.advance()) return;
+
+  refresh();
+
+  if (campaign.getView().phase === "inspection") {
+    element("application").focus({ preventScroll: true });
+  }
+}
+
 function refresh() {
   if (!campaign || screen !== "desk") return;
 
@@ -230,8 +251,16 @@ element("begin-shift-button").addEventListener("click", () => {
   element("application").focus({ preventScroll: true });
 });
 
-element("briefing-dialog").addEventListener("cancel", (event) => {
-  event.preventDefault();
+for (const id of ["briefing-dialog", "feedback-dialog"]) {
+  element(id).addEventListener("cancel", (event) => {
+    event.preventDefault();
+  });
+}
+
+element("approve-button").addEventListener("click", () => {
+  finishInspection("approve");
 });
+
+element("next-applicant-button").addEventListener("click", advance);
 
 loadCampaign();

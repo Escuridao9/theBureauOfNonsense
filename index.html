@@ -210,6 +210,17 @@
                   </div>
                 </article>
               </div>
+              <div class="decision-controls" aria-label="Application decision">
+                <button
+                  id="approve-button"
+                  class="stamp-button approve-button"
+                  type="button"
+                >
+                  <span>Approve</span>
+                </button>
+              </div>
+
+              <p class="decision-hint">Approve only if every rule is met.</p>
             </section>
             <aside class="in-tray" aria-labelledby="queue-heading">
               <div class="tray-heading">
@@ -499,6 +510,45 @@
       </button>
     </dialog>
 
+    <dialog
+      id="feedback-dialog"
+      class="bureau-dialog feedback-dialog"
+      aria-labelledby="feedback-title"
+    >
+      <div class="dialog-topline">
+        <span>AUDIT RECEIPT</span>
+        <span id="feedback-reference"></span>
+      </div>
+
+      <div id="feedback-stamp" class="feedback-stamp">FILED</div>
+
+      <p id="feedback-label" class="eyebrow"></p>
+      <h2 id="feedback-title"></h2>
+      <p id="feedback-body" class="dialog-lead"></p>
+
+      <div id="feedback-explanations" class="feedback-explanations"></div>
+
+      <div class="receipt-total">
+        <span>Points awarded</span>
+        <strong id="feedback-points">+15</strong>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="secondary-button" type="button" data-main-menu>
+          Main menu
+        </button>
+
+        <button
+          id="next-applicant-button"
+          class="primary-button"
+          type="button"
+          autofocus
+        >
+          Next applicant
+        </button>
+      </div>
+    </dialog>
+
     <audio
       id="atmosphere-audio"
       src="assets/audio/office-room-tone.mp3"
@@ -541,6 +591,12 @@
         </div>
         <span class="queue-result" aria-hidden="true"></span>
       </li>
+    </template>
+    <template id="explanation-template">
+      <div class="explanation">
+        <span class="explanation-code"></span>
+        <p></p>
+      </div>
     </template>
   </body>
 </html>

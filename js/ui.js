@@ -12,6 +12,115 @@ export function createInterface() {
   element("rulebook-panel").open =
     !window.matchMedia("(max-width: 780px)").matches;
 
+  function explanationsFor(result) {
+    const broken = result.checks.filter((check) => !check.passed);
+
+    const unnecessary = result.checks.filter(
+      (check) => check.passed && result.reasons.includes(check.id),
+    );
+
+    return broken.length ? [...broken, ...unnecessary] : result.checks;
+  }
+
+  function renderExplanations(container, result) {
+    const items = explanationsFor(result).map((check) => {
+      const item = copyTemplate("explanation-template");
+
+      item.querySelector(".explanation-code").textContent = check.id;
+      item.querySelector("p").textContent =
+        `${check.passed ? "Met" : "Broken"}: ${check.explanation}`;
+
+      return item;
+    });
+
+    container.replaceChildren(...items);
+  }
+
+  function renderFeedback(view) {
+    const result = view.lastResult;
+    const dialog = element("feedback-dialog");
+
+    dialog.classList.toggle("incorrect", !result.correctDecision);
+    dialog.classList.toggle(
+      "partial",
+      result.correctDecision && !result.perfect,
+    );
+
+    text("feedback-reference", `REF. ${result.caseId}`);
+
+    text(
+      "feedback-stamp",
+      result.timedOut
+        ? "TIME EXPIRED"
+        : result.perfect
+          ? "IN ORDER"
+          : result.correctDecision
+            ? "CORRECTION"
+            : "AUDIT FAILED",
+    );
+
+    text(
+      "feedback-label",
+      result.timedOut
+        ? "No decision filed"
+        : result.correctDecision
+          ? "Decision correct"
+          : "Incorrect decision",
+    );
+
+    text(
+      "feedback-title",
+      view.runEnded
+        ? "Third warning. Run closed."
+        : result.timedOut
+          ? "The deadline has passed."
+          : result.perfect
+            ? result.decision === "approve"
+              ? "Authorisation granted."
+              : "Refusal justified."
+            : result.correctDecision
+              ? "The reasons need work."
+              : "The audit found a problem.",
+    );
+
+    let message;
+
+    if (!result.correctDecision) {
+      message =
+        `${result.timedOut ? "The 20 seconds elapsed before a decision was filed. No points awarded. " : ""}` +
+        `This application should have been ${result.expectedDecision === "approve" ? "approved" : "rejected"}. ` +
+        `${result.expectedDecision === "approve" ? "Every regulation is met." : "It breaks the regulation(s) listed below."}`;
+    } else if (!result.perfect) {
+      message =
+        "The rejection is correct, but your reasons missed a broken rule or included a rule that was met. The decision earns 10 points; complete justification would earn 5 more.";
+    } else {
+      message =
+        result.decision === "approve"
+          ? "Every regulation is met. An impeccable inspection, with the stamp in exactly the right place."
+          : "This application breaks the regulation(s) below. You identified every violation and cited no unnecessary rules.";
+    }
+
+    if (view.modeDetails.endless) {
+      message += view.runEnded
+        ? " That was your third wrong verdict. Your record is ready for the Roll of Honour."
+        : ` Audit warnings: ${view.mistakes} of 3. ${view.warningsLeft} wrong verdict${view.warningsLeft === 1 ? "" : "s"} left.`;
+    }
+
+    text("feedback-body", message);
+    text("feedback-points", `+${result.points}`);
+
+    renderExplanations(element("feedback-explanations"), result);
+
+    text(
+      "next-applicant-button",
+      view.runEnded
+        ? "File final report"
+        : view.caseIndex + 1 === view.casesPerShift
+          ? "Finish shift"
+          : "Next applicant",
+    );
+  }
+
   function openFlowDialog(id) {
     for (const other of document.querySelectorAll("dialog[open]")) {
       if (other.id !== id) other.close();
@@ -117,6 +226,8 @@ export function createInterface() {
     renderRules(view.shift);
     renderDocument(view.shift, view.application);
     renderQueue(view);
+    element("approve-button").disabled = view.phase !== "inspection";
+
     if (view.phase === "briefing") {
       text("briefing-shift", `SHIFT ${pad(view.shiftIndex + 1)}`);
       text("briefing-title", view.shift.briefingTitle);
@@ -127,6 +238,9 @@ export function createInterface() {
       );
 
       openFlowDialog("briefing-dialog");
+    } else if (view.phase === "feedback") {
+      renderFeedback(view);
+      openFlowDialog("feedback-dialog");
     } else {
       openFlowDialog(null);
     }
