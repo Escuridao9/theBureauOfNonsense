@@ -1,9 +1,14 @@
 import { createStorage } from "./storage.js";
 import { createAudioController } from "./audio.js";
+import { validateDefinition } from "./game.js";
 
 const storage = createStorage();
 
 const element = id => document.getElementById(id);
+
+let definition;
+let ready = false;
+let loading = false;
 
 const audio = createAudioController({
     atmosphere: element("atmosphere-audio"),
@@ -64,13 +69,58 @@ function closeDialogs() {
     }
 }
 
-function openModeChoose() {
+function openModeChooser() {
+    if (!ready) return;
+
     closeDialogs();
     element("mode-form").reset();
     element("mode-dialog").showModal();
 }
 
-element("new-campaign-button").addEventListener("click", openModeChoose);
+async function loadCampaign() {
+  if (loading) return;
+
+  loading = true;
+  ready = false;
+  element("new-campaign-button").disabled = true;
+  element("loading-state").hidden = false;
+  element("campaign-status").hidden = true;
+  element("error-state").hidden = true;
+  element("retry-button").disabled = true;
+  element("game").setAttribute("aria-busy", "true");
+
+  try {
+    const response = await fetch(
+      new URL("../data/applications.json", import.meta.url)
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `The applications could not be retrieved (HTTP ${response.status}).`
+      );
+    }
+
+    definition = await response.json();
+    validateDefinition(definition);
+
+    ready = true;
+    element("new-campaign-button").disabled = false;
+    element("campaign-status").textContent =
+      "No campaign on file. Your first shift awaits.";
+    element("campaign-status").hidden = false;
+  } catch (error) {
+    element("error-state").hidden = false;
+    element("error-message").textContent =
+      `Please serve the source project with a local web server or GitHub Pages and try again. ${error.message}`;
+  } finally {
+    loading = false;
+    element("loading-state").hidden = true;
+    element("retry-button").disabled = false;
+    element("game").setAttribute("aria-busy", "false");
+  }
+}
+
+element("new-campaign-button").addEventListener("click", openModeChooser);
 
 element("cancel-mode-button").addEventListener("click", () => {
     element("mode-dialog").close();
@@ -80,5 +130,7 @@ element("mode-form").addEventListener("submit", event => {
     event.preventDefault();
 });
 
-element("new-campaign-button").disabled = false;
 element("start-campaign-button").disabled = true;
+element("retry-button").addEventListener("click", loadCampaign);
+
+loadCampaign();
