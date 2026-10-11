@@ -1336,6 +1336,53 @@ details[open] > .binder-label::after {
   margin-top: 20px;
 }
 
+.briefing-instructions {
+  border-top: 1px solid var(--paper-line);
+  border-bottom: 1px solid var(--paper-line);
+  padding: 18px 0;
+  margin: 20px 0;
+}
+
+.briefing-instructions p {
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+
+.briefing-instructions p + p {
+  margin-top: 12px;
+}
+
+.briefing-instructions strong {
+  color: var(--pen);
+}
+
+.briefing-signature {
+  font-family: var(--hand);
+  color: var(--pen);
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.1;
+  transform: rotate(-2deg);
+  transform-origin: left center;
+}
+
+.briefing-signature span {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--paper-muted);
+  line-height: 1.7;
+}
+
+.mode-note {
+  color: var(--pen);
+  font-family: var(--hand);
+  font-size: 1.35rem;
+  line-height: 1.35;
+  padding: 13px 0;
+  border-bottom: 1px dashed #a9b4a0;
+}
+
 @media (min-width: 1450px) {
   .desk-layout {
     grid-template-columns: 285px minmax(400px, 1fr) 245px;

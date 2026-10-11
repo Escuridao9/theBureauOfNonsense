@@ -244,6 +244,55 @@
     </div>
 
     <dialog
+      id="briefing-dialog"
+      class="bureau-dialog briefing-dialog"
+      aria-labelledby="briefing-title"
+    >
+      <div class="dialog-topline">
+        <span>INTERNAL CORRESPONDENCE</span>
+        <span id="briefing-shift">SHIFT 01</span>
+      </div>
+
+      <p class="eyebrow">From the office of the chief clerk</p>
+
+      <h2 id="briefing-title"></h2>
+      <p id="briefing-body" class="dialog-lead"></p>
+
+      <div class="briefing-instructions">
+        <p>
+          <strong>Your job is simple.</strong>
+          Read the rules, inspect the application, then stamp your decision.
+        </p>
+        <p>
+          Correct inspections earn up to <strong>15 points</strong>. The
+          applicant's charm earns them nothing.
+        </p>
+      </div>
+
+      <p id="briefing-mode" class="mode-note"></p>
+
+      <p class="briefing-signature">
+        M. Punctilio<br />
+        <span>Chief Clerk, Inconveniences &amp; Exceptions</span>
+      </p>
+
+      <div class="dialog-actions">
+        <button class="secondary-button" type="button" data-main-menu>
+          Main menu
+        </button>
+
+        <button
+          id="begin-shift-button"
+          class="primary-button"
+          type="button"
+          autofocus
+        >
+          Begin shift
+        </button>
+      </div>
+    </dialog>
+
+    <dialog
       id="mode-dialog"
       class="bureau-dialog mode-dialog"
       aria-labelledby="mode-title"

@@ -5,7 +5,7 @@ import { createInterface } from "./ui.js";
 
 const storage = createStorage();
 
-const element = id => document.getElementById(id);
+const element = (id) => document.getElementById(id);
 
 let definition;
 let ready = false;
@@ -14,34 +14,41 @@ let campaign = null;
 let screen = "menu";
 let ui;
 
-const audio = createAudioController({
+const audio = createAudioController(
+  {
     atmosphere: element("atmosphere-audio"),
     music: element("music-audio"),
     effects: element("stamp-audio"),
-    paper: element("paper-audio")
-}, storage.loadSettings(), settings => {
+    paper: element("paper-audio"),
+  },
+  storage.loadSettings(),
+  (settings) => {
     const saved = storage.saveSettings(settings);
     element("settings-status").textContent = saved
-    ? "Preferences saved. Make yourself comfortable."
-    : "Changes apply for this visit. Saving is unavailable in this browser.";
-});
+      ? "Preferences saved. Make yourself comfortable."
+      : "Changes apply for this visit. Saving is unavailable in this browser.";
+  },
+);
 
 function syncSettings() {
-    const settings = audio.getSettings();
-    for (const [channel, preference] of Object.entries(settings)) {
-        element(`${channel}-enabled`).checked = preference.enabled;
-        element(`${channel}-volume`).value = preference.volume;
-        element(`${channel}-volume`).setAttribute("aria-valuetext", `${preference.volume}%`);
-        element(`${channel}-volume-output`).value = `${preference.volume}%`;
-    }
+  const settings = audio.getSettings();
+  for (const [channel, preference] of Object.entries(settings)) {
+    element(`${channel}-enabled`).checked = preference.enabled;
+    element(`${channel}-volume`).value = preference.volume;
+    element(`${channel}-volume`).setAttribute(
+      "aria-valuetext",
+      `${preference.volume}%`,
+    );
+    element(`${channel}-volume-output`).value = `${preference.volume}%`;
+  }
 }
 
 function openSettings() {
-    syncSettings();
-    element("settings-status").textContent = storage.isAvailable()
+  syncSettings();
+  element("settings-status").textContent = storage.isAvailable()
     ? "Your preferences stay with this browser."
     : "Changes apply for this visit. Saving is unavailable in this browser.";
-    element("settings-dialog").showModal();
+  element("settings-dialog").showModal();
 }
 
 for (const id of ["settings-button", "desk-settings-button"]) {
@@ -49,19 +56,19 @@ for (const id of ["settings-button", "desk-settings-button"]) {
 }
 
 element("close-settings-button").addEventListener("click", () => {
-    element("settings-dialog").close();
-})
+  element("settings-dialog").close();
+});
 
 for (const channel of Object.keys(audio.getSettings())) {
-    element(`${channel}-enabled`).addEventListener("change", event => {
-        audio.setChannel(channel, { enabled: event.target.checked });
-        syncSettings();
-    });
+  element(`${channel}-enabled`).addEventListener("change", (event) => {
+    audio.setChannel(channel, { enabled: event.target.checked });
+    syncSettings();
+  });
 
-    element(`${channel}-volume`).addEventListener("input", event => {
-        audio.setChannel(channel, { volume: Number(event.target.value) });
-        syncSettings();
-    });
+  element(`${channel}-volume`).addEventListener("input", (event) => {
+    audio.setChannel(channel, { volume: Number(event.target.value) });
+    syncSettings();
+  });
 }
 
 document.addEventListener("pointerdown", () => audio.activate());
@@ -70,9 +77,9 @@ document.addEventListener("keydown", () => audio.activate());
 syncSettings();
 
 function closeDialogs() {
-    for (const dialog of document.querySelectorAll("dialog[open]")) {
-        dialog.close();
-    }
+  for (const dialog of document.querySelectorAll("dialog[open]")) {
+    dialog.close();
+  }
 }
 
 function openModeChooser() {
@@ -98,12 +105,12 @@ async function loadCampaign() {
 
   try {
     const response = await fetch(
-      new URL("../data/applications.json", import.meta.url)
+      new URL("../data/applications.json", import.meta.url),
     );
 
     if (!response.ok) {
       throw new Error(
-        `The applications could not be retrieved (HTTP ${response.status}).`
+        `The applications could not be retrieved (HTTP ${response.status}).`,
       );
     }
 
@@ -148,6 +155,12 @@ function renderMenu() {
     : "No campaign on file. Your first shift awaits.";
 }
 
+function refresh() {
+  if (!campaign || screen !== "desk") return;
+
+  ui.render(campaign.getView());
+}
+
 function openDesk() {
   if (!ready || !campaign) return;
 
@@ -160,9 +173,11 @@ function openDesk() {
   element("skip-link").setAttribute("href", "#application");
   campaign.resumeClock();
 
-  ui.render(campaign.getView());
+  refresh();
 
-  element("application").focus({ preventScroll: true });
+  if (campaign.getView().phase === "inspection") {
+    element("application").focus({ preventScroll: true });
+  }
 }
 
 function showMenu() {
@@ -176,10 +191,10 @@ function showMenu() {
 element("new-campaign-button").addEventListener("click", openModeChooser);
 
 element("cancel-mode-button").addEventListener("click", () => {
-    element("mode-dialog").close();
+  element("mode-dialog").close();
 });
 
-element("mode-form").addEventListener("submit", event => {
+element("mode-form").addEventListener("submit", (event) => {
   event.preventDefault();
 
   if (!ready || !element("mode-dialog").open) return;
@@ -188,7 +203,7 @@ element("mode-form").addEventListener("submit", event => {
 
   campaign = createCampaign(definition, null, Math.random, {
     mode: form.get("mode"),
-    clerk: form.get("clerk")
+    clerk: form.get("clerk"),
   });
 
   openDesk();
@@ -203,5 +218,20 @@ element("continue-campaign-button").addEventListener("click", () => {
 });
 
 element("retry-button").addEventListener("click", loadCampaign);
+
+for (const button of document.querySelectorAll("[data-main-menu]")) {
+  button.addEventListener("click", showMenu);
+}
+
+element("begin-shift-button").addEventListener("click", () => {
+  if (screen !== "desk" || !campaign?.startShift()) return;
+
+  refresh();
+  element("application").focus({ preventScroll: true });
+});
+
+element("briefing-dialog").addEventListener("cancel", (event) => {
+  event.preventDefault();
+});
 
 loadCampaign();
