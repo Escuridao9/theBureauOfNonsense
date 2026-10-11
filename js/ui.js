@@ -219,7 +219,9 @@ export function createInterface(definition) {
       return card;
     });
 
-    element("rules").replaceChildren(...cards);
+    const list = element("rules");
+    list.replaceChildren();
+    for (const card of cards) list.appendChild(card);
   }
 
   function renderDocument(shift, application) {
