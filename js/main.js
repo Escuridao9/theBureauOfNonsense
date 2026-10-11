@@ -157,12 +157,12 @@ function openDesk() {
   element("campaign-screen").hidden = false;
   element("desk-header").hidden = false;
   element("desk-footer").hidden = false;
-  element("skip-link").setAttribute("href", "#department-name");
+  element("skip-link").setAttribute("href", "#application");
   campaign.resumeClock();
 
   ui.render(campaign.getView());
 
-  element("department-name").focus({ preventScroll: true });
+  element("application").focus({ preventScroll: true });
 }
 
 function showMenu() {
