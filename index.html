@@ -9,6 +9,27 @@
   </head>
   <body>
     <div class="bureau-shell">
+      <header id="desk-header" class="bureau-header" hidden>
+        <div class="identity">
+          <span class="bureau-mark" aria-hidden="true">B<span>N</span></span>
+          <div>
+            <p class="eyebrow">Ministry of Exceedingly Specific Affairs</p>
+            <h1>The Bureau <em>of Nonsense</em></h1>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="desk-settings-button" class="text-button" type="button">
+            Settings
+          </button>
+          <button
+            id="menu-button"
+            class="text-button muted-button"
+            type="button"
+          >
+            Main menu
+          </button>
+        </div>
+      </header>
       <main id="game" aria-busy="true">
         <section
           id="start-screen"
@@ -93,7 +114,43 @@
             </div>
           </div>
         </section>
+        <section id="campaign-screen" aria-label="Clerk's desk" hidden>
+          <section class="shift-bar" aria-label="Current shift">
+            <div class="shift-identity">
+              <span id="shift-number" class="shift-tag">SHIFT 01</span>
+              <div>
+                <p class="eyebrow">Your assignment</p>
+                <h2 id="department-name" tabindex="-1">Opening the bureau…</h2>
+              </div>
+            </div>
+            <div class="shift-metrics">
+              <div>
+                <span class="metric-label">Office date</span>
+                <strong id="office-date">—</strong>
+              </div>
+              <div>
+                <span class="metric-label">Campaign points</span>
+                <strong id="score">000</strong>
+              </div>
+              <div>
+                <span class="metric-label">Best in this mode</span>
+                <strong id="best-score">—</strong>
+              </div>
+            </div>
+          </section>
+          <div class="run-strip">
+            <p>
+              <span id="mode-name">Normal</span>
+              <span aria-hidden="true"> / </span>
+              <span id="clerk-name">A. Clerk</span>
+            </p>
+          </div>
+        </section>
       </main>
+      <footer id="desk-footer" class="bureau-footer" hidden>
+  <span>BUREAU OF NONSENSE <span class="footer-divider">/</span> CLERK TERMINAL 04</span>
+  <span>Every stamp leaves a paper trail.</span>
+</footer>
     </div>
 
     <dialog

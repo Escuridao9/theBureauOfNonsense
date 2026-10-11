@@ -1,6 +1,7 @@
 import { createStorage } from "./storage.js";
 import { createAudioController } from "./audio.js";
-import { validateDefinition } from "./game.js";
+import { createCampaign, validateDefinition } from "./game.js";
+import { formatDate } from "./rules.js";
 
 const storage = createStorage();
 
@@ -9,6 +10,8 @@ const element = id => document.getElementById(id);
 let definition;
 let ready = false;
 let loading = false;
+let campaign = null;
+let screen = "menu";
 
 const audio = createAudioController({
     atmosphere: element("atmosphere-audio"),
@@ -40,7 +43,9 @@ function openSettings() {
     element("settings-dialog").showModal();
 }
 
-element("settings-button").addEventListener("click", openSettings);
+for (const id of ["settings-button", "desk-settings-button"]) {
+  element(id).addEventListener("click", openSettings);
+}
 
 element("close-settings-button").addEventListener("click", () => {
     element("settings-dialog").close();
@@ -70,11 +75,12 @@ function closeDialogs() {
 }
 
 function openModeChooser() {
-    if (!ready) return;
+  if (!ready || screen !== "menu") return;
 
-    closeDialogs();
-    element("mode-form").reset();
-    element("mode-dialog").showModal();
+  closeDialogs();
+  element("mode-form").reset();
+  element("clerk-input").value = campaign?.getView().clerk ?? "";
+  element("mode-dialog").showModal();
 }
 
 async function loadCampaign() {
@@ -120,6 +126,58 @@ async function loadCampaign() {
   }
 }
 
+function renderMenu() {
+  element("start-screen").hidden = false;
+  element("campaign-screen").hidden = true;
+  element("desk-header").hidden = true;
+  element("desk-footer").hidden = true;
+  element("skip-link").setAttribute("href", "#start-title");
+  element("new-campaign-button").disabled = !ready;
+
+  const view = campaign?.getView();
+
+  element("continue-campaign-button").disabled =
+    !ready || !view || view.phase === "complete";
+  element("campaign-status").hidden = !ready;
+  element("campaign-status").textContent = view
+    ? `${view.modeDetails.name} · Shift ${view.shiftIndex + 1}${
+        view.shiftCount === null ? "" : ` of ${view.shiftCount}`
+      } · ${view.totals.count} applications filed · ${view.totals.points} points.`
+    : "No campaign on file. Your first shift awaits.";
+}
+
+function openDesk() {
+  if (!ready || !campaign) return;
+
+  closeDialogs();
+  screen = "desk";
+  element("start-screen").hidden = true;
+  element("campaign-screen").hidden = false;
+  element("desk-header").hidden = false;
+  element("desk-footer").hidden = false;
+  element("skip-link").setAttribute("href", "#department-name");
+  campaign.resumeClock();
+
+  const view = campaign.getView();
+
+  element("shift-number").textContent =
+    `SHIFT ${String(view.shiftIndex + 1).padStart(2, "0")}`;
+  element("department-name").textContent = view.shift.name;
+  element("office-date").textContent = formatDate(view.shift.date);
+  element("score").textContent = String(view.totals.points).padStart(3, "0");
+  element("mode-name").textContent = view.modeDetails.name;
+  element("clerk-name").textContent = view.clerk;
+  element("department-name").focus({ preventScroll: true });
+}
+
+function showMenu() {
+  campaign?.pauseClock();
+  closeDialogs();
+  screen = "menu";
+  renderMenu();
+  element("start-title").focus({ preventScroll: true });
+}
+
 element("new-campaign-button").addEventListener("click", openModeChooser);
 
 element("cancel-mode-button").addEventListener("click", () => {
@@ -127,10 +185,28 @@ element("cancel-mode-button").addEventListener("click", () => {
 });
 
 element("mode-form").addEventListener("submit", event => {
-    event.preventDefault();
+  event.preventDefault();
+
+  if (!ready || !element("mode-dialog").open) return;
+
+  const form = new FormData(event.currentTarget);
+
+  campaign = createCampaign(definition, null, Math.random, {
+    mode: form.get("mode"),
+    clerk: form.get("clerk")
+  });
+
+  openDesk();
 });
 
-element("start-campaign-button").disabled = true;
+element("menu-button").addEventListener("click", showMenu);
+
+element("continue-campaign-button").addEventListener("click", () => {
+  if (campaign && campaign.getView().phase !== "complete") {
+    openDesk();
+  }
+});
+
 element("retry-button").addEventListener("click", loadCampaign);
 
 loadCampaign();
