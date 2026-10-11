@@ -1,5 +1,5 @@
-import { assessInspection, calculateTotals } from ".rules/js";
-import { getMode, normalizeClerk } from ".modes.js";
+import { assessInspection, calculateTotals } from "./rules.js";
+import { getMode, normalizeClerk } from "./modes.js";
 
 const PHASES = [
   "briefing",
@@ -31,6 +31,7 @@ function makeId() {
 
 export function validateDefinition(definition) {
   if (
+    !definition ||
     definition.version !== 1 ||
     !Array.isArray(definition.shifts) ||
     !definition.shifts.length ||
@@ -47,7 +48,7 @@ export function validateDefinition(definition) {
       shiftIds.has(shift.id) ||
       !Array.isArray(shift.rules) ||
       !shift.rules.length ||
-      !Array.isArray(shift.field) ||
+      !Array.isArray(shift.fields) ||
       !Array.isArray(shift.applications) ||
       shift.applications.length < definition.casesPerShift
     ) {
@@ -82,39 +83,64 @@ function legacyId(queues) {
 
 function restoreState(definition, saved, now) {
   try {
-    if (!saved || ![1, 2].includes(saved.version) || !PHASES.includes(saved.phase) ||
-        !Number.isInteger(saved.shiftIndex) || saved.shiftIndex < 0 ||
-        !Number.isInteger(saved.caseIndex) || saved.caseIndex < 0 ||
-        saved.caseIndex >= definition.casesPerShift ||
-        !Array.isArray(saved.queues) || !Array.isArray(saved.results)) return null;
+    if (
+      !saved ||
+      ![1, 2].includes(saved.version) ||
+      !PHASES.includes(saved.phase) ||
+      !Number.isInteger(saved.shiftIndex) ||
+      saved.shiftIndex < 0 ||
+      !Number.isInteger(saved.caseIndex) ||
+      saved.caseIndex < 0 ||
+      saved.caseIndex >= definition.casesPerShift ||
+      !Array.isArray(saved.queues) ||
+      !Array.isArray(saved.results)
+    )
+      return null;
 
     if (saved.version === 2 && typeof saved.mode !== "string") return null;
 
     const mode = getMode(saved.version === 1 ? "normal" : saved.mode);
     const expectedQueues = mode.endless
-      ? (Math.floor(saved.shiftIndex / definition.shifts.length) + 1) * definition.shifts.length
+      ? (Math.floor(saved.shiftIndex / definition.shifts.length) + 1) *
+        definition.shifts.length
       : definition.shifts.length;
 
-    if (saved.queues.length !== expectedQueues ||
-        saved.shiftIndex >= saved.queues.length) return null;
+    if (
+      saved.queues.length !== expectedQueues ||
+      saved.shiftIndex >= saved.queues.length
+    )
+      return null;
 
     for (let index = 0; index < saved.queues.length; index += 1) {
       const queue = saved.queues[index];
       const shift = definition.shifts[index % definition.shifts.length];
 
-      if (!Array.isArray(queue) || queue.length !== definition.casesPerShift ||
-          new Set(queue).size !== queue.length ||
-          queue.some(id => !shift.applications.some(item => item.id === id))) return null;
+      if (
+        !Array.isArray(queue) ||
+        queue.length !== definition.casesPerShift ||
+        new Set(queue).size !== queue.length ||
+        queue.some((id) => !shift.applications.some((item) => item.id === id))
+      )
+        return null;
     }
 
-        if (saved.phase === "briefing" && saved.caseIndex !== 0) return null;
-    if (saved.phase === "shift-report" &&
-        saved.caseIndex !== definition.casesPerShift - 1) return null;
-    if (saved.phase === "complete" && !mode.endless &&
-        (saved.shiftIndex !== definition.shifts.length - 1 ||
-         saved.caseIndex !== definition.casesPerShift - 1)) return null;
+    if (saved.phase === "briefing" && saved.caseIndex !== 0) return null;
+    if (
+      saved.phase === "shift-report" &&
+      saved.caseIndex !== definition.casesPerShift - 1
+    )
+      return null;
+    if (
+      saved.phase === "complete" &&
+      !mode.endless &&
+      (saved.shiftIndex !== definition.shifts.length - 1 ||
+        saved.caseIndex !== definition.casesPerShift - 1)
+    )
+      return null;
 
-    const expectedCount = saved.shiftIndex * definition.casesPerShift + saved.caseIndex +
+    const expectedCount =
+      saved.shiftIndex * definition.casesPerShift +
+      saved.caseIndex +
       (["feedback", "shift-report", "complete"].includes(saved.phase) ? 1 : 0);
 
     if (saved.results.length !== expectedCount) return null;
@@ -124,52 +150,76 @@ function restoreState(definition, saved, now) {
       const shift = definition.shifts[shiftIndex % definition.shifts.length];
       const caseId = saved.queues[shiftIndex][index % definition.casesPerShift];
 
-      if (record.shiftId !== shift.id || record.caseId !== caseId ||
-          !Array.isArray(record.reasons) ||
-          (record.decision === "timeout" && !mode.timed)) {
+      if (
+        record.shiftId !== shift.id ||
+        record.caseId !== caseId ||
+        !Array.isArray(record.reasons) ||
+        (record.decision === "timeout" && !mode.timed)
+      ) {
         throw new Error("The saved paper trail is inconsistent.");
       }
 
       return assessInspection(
         shift,
-        shift.applications.find(item => item.id === caseId),
+        shift.applications.find((item) => item.id === caseId),
         record.decision,
-        record.reasons
+        record.reasons,
       );
     });
 
-    const mistakes = results.filter(result => !result.correctDecision).length;
+    const mistakes = results.filter((result) => !result.correctDecision).length;
 
-    if (mode.endless && (mistakes > 3 ||
+    if (
+      mode.endless &&
+      (mistakes > 3 ||
         (mistakes === 3 && !["feedback", "complete"].includes(saved.phase)) ||
-        (mistakes < 3 && saved.phase === "complete"))) return null;
-    if (mode.endless && mistakes === 3 && results.at(-1).correctDecision) return null;
+        (mistakes < 3 && saved.phase === "complete"))
+    )
+      return null;
+    if (mode.endless && mistakes === 3 && results.at(-1).correctDecision)
+      return null;
 
-    const ended = saved.phase === "complete" || (mode.endless && mistakes === 3);
+    const ended =
+      saved.phase === "complete" || (mode.endless && mistakes === 3);
     const legacy = saved.version === 1;
     const startedAt = legacy ? new Date(now).toISOString() : saved.startedAt;
-    const endedAt = legacy ? ended ? startedAt : null : saved.endedAt;
+    const endedAt = legacy ? (ended ? startedAt : null) : saved.endedAt;
 
-    if (!Number.isFinite(Date.parse(startedAt)) ||
-        (ended && (!Number.isFinite(Date.parse(endedAt)) ||
+    if (
+      !Number.isFinite(Date.parse(startedAt)) ||
+      (ended &&
+        (!Number.isFinite(Date.parse(endedAt)) ||
           Date.parse(endedAt) < Date.parse(startedAt))) ||
-        (!ended && endedAt !== null)) return null;
+      (!ended && endedAt !== null)
+    )
+      return null;
 
     const runId = legacy ? legacyId(saved.queues) : saved.runId;
 
-    if (typeof runId !== "string" || !runId.length || runId.length > 96 ||
-        (!legacy && typeof saved.clerk !== "string")) return null;
+    if (
+      typeof runId !== "string" ||
+      !runId.length ||
+      runId.length > 96 ||
+      (!legacy && typeof saved.clerk !== "string")
+    )
+      return null;
 
     let timer = null;
 
     if (mode.timed) {
       timer = saved.timer;
 
-      if (!timer || !Number.isFinite(timer.remainingMs) ||
-          timer.remainingMs < 0 || timer.remainingMs > DECISION_TIME ||
-          (timer.deadline !== null && (!Number.isFinite(timer.deadline) ||
+      if (
+        !timer ||
+        !Number.isFinite(timer.remainingMs) ||
+        timer.remainingMs < 0 ||
+        timer.remainingMs > DECISION_TIME ||
+        (timer.deadline !== null &&
+          (!Number.isFinite(timer.deadline) ||
             timer.deadline > now + DECISION_TIME)) ||
-          (saved.phase !== "inspection" && timer.deadline !== null)) return null;
+        (saved.phase !== "inspection" && timer.deadline !== null)
+      )
+        return null;
 
       timer = { remainingMs: timer.remainingMs, deadline: timer.deadline };
     } else if (!legacy && saved.timer !== null) return null;
@@ -186,7 +236,7 @@ function restoreState(definition, saved, now) {
       caseIndex: saved.caseIndex,
       queues: structuredClone(saved.queues),
       results,
-      timer
+      timer,
     };
   } catch {
     return null;
@@ -229,23 +279,11 @@ export function createCampaign(
       : null,
   };
 
-  return {
-    startShift,
-    submit,
-    expire,
-    pauseClock,
-    resumeClock,
-    getView,
-    timeRemaining: () =>
-      details.timed && state.phase === "inspection" ? remaining() : null,
-    snapshot: () => structuredClone(state),
-  };
-
   const details = getMode(state.mode);
   const currentShift = () =>
     definition.shifts[state.shiftIndex % definition.shifts.length];
   const currentApplication = () =>
-    currentShift().application.find(
+    currentShift().applications.find(
       (item) => item.id === state.queues[state.shiftIndex][state.caseIndex],
     );
   const mistakes = () =>
@@ -404,4 +442,17 @@ export function createCampaign(
       restored: Boolean(restored),
     });
   }
+
+  return {
+    startShift,
+    submit,
+    advance,
+    expire,
+    pauseClock,
+    resumeClock,
+    getView,
+    timeRemaining: () =>
+      details.timed && state.phase === "inspection" ? remaining() : null,
+    snapshot: () => structuredClone(state),
+  };
 }

@@ -5,7 +5,7 @@ export function normalizeText(value) {
 export function formatDate(value) {
   const date = new Date(`${value}T00:00:00Z`);
 
-  return new Int16Array.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -18,7 +18,7 @@ export function formatField(value, field) {
     case "date":
       return formatDate(value);
     case "number":
-      return `${new Int1.NumberFormat("en-GB").format(value)} ${field.unit}`;
+      return `${new Intl.NumberFormat("en-GB").format(value)} ${field.unit}`;
     case "list":
       return value.join(" + ");
     case "boolean":
@@ -45,8 +45,8 @@ export function checkRule(rule, application, officeDate) {
     case "maxNumber":
       passed = Number.isFinite(value) && value >= 0 && value <= rule.maximum;
       explanation =
-        `${rule.fieldLabel} is ${new Int1.NumberFormat("en-GB").format(value)} ${rule.unit}; ` +
-        `the limit is ${new Int1.NumberFormat("en-GB").format(rule.maximum)} ${rule.unit}.`;
+        `${rule.fieldLabel} is ${new Intl.NumberFormat("en-GB").format(value)} ${rule.unit}; ` +
+        `the limit is ${new Intl.NumberFormat("en-GB").format(rule.maximum)} ${rule.unit}.`;
       break;
 
     case "contains":
@@ -56,14 +56,14 @@ export function checkRule(rule, application, officeDate) {
           (item) => normalizeText(item) === normalizeText(rule.required),
         );
       explanation =
-        `Authorised zones: ${value.join(" + ")}.` +
+        `Authorised zones: ${value.join(" + ")}. ` +
         `${rule.required} permission is required.`;
       break;
 
     case "dateNotBefore":
       passed = /^\d{4}-\d{2}-\d{2}$/.test(value) && value >= officeDate;
       explanation =
-        `The certificate expires on ${formatDate(value)}.` +
+        `The certificate expires on ${formatDate(value)}. ` +
         `The office date is ${formatDate(officeDate)}; it must still be valid that day.`;
       break;
 
@@ -72,8 +72,9 @@ export function checkRule(rule, application, officeDate) {
         (item) => normalizeText(item) === normalizeText(value),
       );
       explanation =
-        `The requested destination is ${value}.` +
+        `The requested destination is ${value}. ` +
         `Only ${rule.allowed.join(", ")} are authorised.`;
+      break;
 
     case "timeWindow": {
       const current = timeInMinutes(value);
@@ -87,7 +88,7 @@ export function checkRule(rule, application, officeDate) {
           : current >= start || current <= end);
 
       explanation =
-        `The proposed start is ${value}.` +
+        `The proposed start is ${value}. ` +
         `Permitted start times run from ${rule.start} through midnight to ${rule.end}, inclusive.`;
       break;
     }
@@ -95,7 +96,7 @@ export function checkRule(rule, application, officeDate) {
     case "equals":
       passed = value === rule.required;
       explanation =
-        `Property owner consent is ${value ? "provided" : "not provided"}.` +
+        `Property owner consent is ${value ? "provided" : "not provided"}. ` +
         "Consent is required.";
       break;
 
@@ -107,52 +108,58 @@ export function checkRule(rule, application, officeDate) {
 }
 
 export function assessInspection(shift, application, decision, reasons = []) {
-    if (!["approve", "reject", "timeout"].includes(decision)) {
-        throw new Error("Unknown decision.");
-    }
+  if (!["approve", "reject", "timeout"].includes(decision)) {
+    throw new Error("Unknown decision.");
+  }
 
-    const uniqueReasons = [...new Set(reasons)];
+  const uniqueReasons = [...new Set(reasons)];
 
-    if (uniqueReasons.some(id => !shift.rules.some(rule => rule.id === id))) {
-        throw new Error ("The cited regulation does not belong to this department.");
-    }
+  if (uniqueReasons.some((id) => !shift.rules.some((rule) => rule.id === id))) {
+    throw new Error("The cited regulation does not belong to this department.");
+  }
 
-    if (decision === "reject" && uniqueReasons.length === 0) {
-        throw new Error("A rejection needs at least one reason.");
-    }
+  if (decision === "reject" && uniqueReasons.length === 0) {
+    throw new Error("A rejection needs at least one reason.");
+  }
 
-    const checks = shift.rules.map(rule => checkRule(rule, application, shift.date));
-    const violations = checks.filter(check => !check.passed);
-    const expectedDecision = violations.length === 0 ? "approve" : "reject";
-    const correctDecision = decision === expectedDecision;
+  const checks = shift.rules.map((rule) =>
+    checkRule(rule, application, shift.date),
+  );
+  const violations = checks.filter((check) => !check.passed);
+  const expectedDecision = violations.length === 0 ? "approve" : "reject";
+  const correctDecision = decision === expectedDecision;
 
-    const justified = decision === "approve" || 
+  const justified =
+    decision === "approve" ||
     (uniqueReasons.length === violations.length &&
-        violations.every(violation => uniqueReasons.includes(violation.id)));
+      violations.every((violation) => uniqueReasons.includes(violation.id)));
 
-    const perfect = correctDecision && justified;
-    const points = correctDecision ? 10 + (perfect ? 5 : 0) : 0;
+  const perfect = correctDecision && justified;
+  const points = correctDecision ? 10 + (perfect ? 5 : 0) : 0;
 
-    return {
-        shiftId: shift.id,
-        caseId: application.id,
-        decision,
-        reasons: decision === "reject" ? uniqueReasons : [],
-        expectedDecision,
-        correctDecision,
-        perfect,
-        points,
-        checks,
-        timedOut: decision === "timeout",
-        violations: violations.map(violation => violation.id)
-    };
+  return {
+    shiftId: shift.id,
+    caseId: application.id,
+    decision,
+    reasons: decision === "reject" ? uniqueReasons : [],
+    expectedDecision,
+    correctDecision,
+    perfect,
+    points,
+    checks,
+    timedOut: decision === "timeout",
+    violations: violations.map((violation) => violation.id),
+  };
 }
 
 export function calculateTotals(results) {
-    return results.reduce((totals, result) => ({
-        count: totals.count + 1,
-        points: totals.points + result.points,
-        correct: totals.correct + Number(result.correctDecision),
-        perfect: totals.perfect + Number(result.perfect)
-    }), { count: 0, points: 0, correct: 0, perfect: 0 });
+  return results.reduce(
+    (totals, result) => ({
+      count: totals.count + 1,
+      points: totals.points + result.points,
+      correct: totals.correct + Number(result.correctDecision),
+      perfect: totals.perfect + Number(result.perfect),
+    }),
+    { count: 0, points: 0, correct: 0, perfect: 0 },
+  );
 }

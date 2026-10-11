@@ -1,4 +1,5 @@
-import { formatDate, formatField } from "./rules.js";
+import { formatDate, formatField, calculateTotals } from "./rules.js";
+import { getMode } from "./modes.js";
 
 const element = (id) => document.getElementById(id);
 const text = (id, value) => {
@@ -8,7 +9,10 @@ const copyTemplate = (id) =>
   element(id).content.firstElementChild.cloneNode(true);
 const pad = (value) => String(value).padStart(2, "0");
 
-export function createInterface() {
+export function createInterface(definition) {
+  let clockCase = null;
+  let previousSeconds = 21;
+  let applicationSlide = null;
   element("rulebook-panel").open =
     !window.matchMedia("(max-width: 780px)").matches;
 
@@ -121,6 +125,79 @@ export function createInterface() {
     );
   }
 
+  function renderAudit(records) {
+    const items = records.map((record) => {
+      const shift = definition.shifts.find(
+        (item) => item.id === record.shiftId,
+      );
+      const application = shift.applications.find(
+        (item) => item.id === record.caseId,
+      );
+      const item = copyTemplate("audit-template");
+      item.classList.toggle("incorrect", !record.correctDecision);
+      item.classList.toggle(
+        "partial",
+        record.correctDecision && !record.perfect,
+      );
+      item.querySelector(".audit-name").textContent = application.name;
+      item.querySelector(".audit-result").textContent =
+        `${record.points}/15 points`;
+      item.querySelector(".audit-decision").textContent =
+        `${record.caseId} · ${record.timedOut ? "No decision before the deadline" : `You ${record.decision === "approve" ? "approved" : "rejected"}`}; expected ${record.expectedDecision === "approve" ? "approval" : "rejection"}.`;
+      renderExplanations(item.querySelector(".audit-explanations"), record);
+      return item;
+    });
+    element("audit-list").replaceChildren(...items);
+  }
+
+  function renderReport(view, savingAvailable) {
+    const finished = view.phase === "complete";
+    const records = finished ? view.results : view.shiftResults;
+    const totals = calculateTotals(records);
+    text(
+      "report-code",
+      finished ? "RUN COMPLETE" : `SHIFT ${pad(view.shiftIndex + 1)}`,
+    );
+    text(
+      "report-label",
+      `${view.modeDetails.name} / ${finished ? "Final assessment" : "End-of-shift assessment"}`,
+    );
+    text(
+      "report-title",
+      finished
+        ? view.modeDetails.endless
+          ? "The stamp must rest."
+          : totals.perfect === totals.count
+            ? "You may keep the stamp."
+            : "Your paperwork is on record."
+        : "The desk is clear.",
+    );
+    text(
+      "report-message",
+      finished
+        ? `${view.modeDetails.endless ? `You filed ${totals.count} applications across ${view.shiftIndex + 1} shifts before the third wrong verdict closed your appointment.` : `Three departments. Eighteen applications. An entirely unreasonable amount of responsibility. Your ${view.modeDetails.name} campaign is complete.`}${savingAvailable ? " Your run is on file in the Roll of Honour." : " Your record is available for this visit; saving was unavailable."}`
+        : `You processed ${totals.count} applications for the ${view.shift.name}. Review the paper trail before your next assignment.`,
+    );
+    text(
+      "report-score",
+      finished && view.modeDetails.endless
+        ? String(totals.points)
+        : `${totals.points}/${totals.count * 15}`,
+    );
+    text("report-accuracy", `${totals.correct}/${totals.count}`);
+    text("report-perfect", `${totals.perfect}/${totals.count}`);
+    renderAudit(records);
+    text(
+      "report-continue-button",
+      finished
+        ? "Main menu"
+        : view.shiftIndex + 1 === view.shiftCount
+          ? "Complete campaign"
+          : "Next shift",
+    );
+    element("report-menu-button").hidden = finished;
+  }
+
   function openFlowDialog(id) {
     for (const other of document.querySelectorAll("dialog[open]")) {
       if (other.id !== id) other.close();
@@ -213,7 +290,18 @@ export function createInterface() {
     element("queue").replaceChildren(...items);
   }
 
-  function render(view) {
+  function render(view, bestScore, savingAvailable) {
+    cancelApplicationSlide();
+    element("game").setAttribute("aria-busy", "false");
+    element("loading-state").hidden = true;
+    element("error-state").hidden = true;
+    element("storage-warning").hidden = savingAvailable;
+    text(
+      "save-status",
+      savingAvailable
+        ? "Progress saved in this browser."
+        : "Current run is not being saved.",
+    );
     element("desk-layout").hidden = false;
     text("shift-number", `SHIFT ${pad(view.shiftIndex + 1)}`);
     text("department-name", view.shift.name);
@@ -221,6 +309,17 @@ export function createInterface() {
     text("score", String(view.totals.points).padStart(3, "0"));
     text("mode-name", view.modeDetails.name);
     text("clerk-name", view.clerk);
+    element("audit-warnings").hidden = !view.modeDetails.endless;
+    text("warning-count", `${view.mistakes} of 3 audit warnings`);
+    for (const [index, mark] of [
+      ...element("audit-warnings").querySelectorAll("i"),
+    ].entries()) {
+      mark.classList.toggle("used", index < view.mistakes);
+    }
+    text(
+      "best-score",
+      bestScore === null ? "—" : String(bestScore).padStart(3, "0"),
+    );
     text("rulebook-intro", view.shift.intro);
     text("shift-memo", view.shift.memo);
     renderRules(view.shift);
@@ -228,6 +327,15 @@ export function createInterface() {
     renderQueue(view);
     const inspecting = view.phase === "inspection";
 
+    const nextClockCase = `${view.runId}/${view.shiftIndex}/${view.caseIndex}`;
+    if (clockCase !== nextClockCase) {
+      clockCase = nextClockCase;
+      previousSeconds = 21;
+      text("clock-warning", "");
+    }
+    renderClock(
+      view.modeDetails.timed && inspecting ? view.timer.remainingMs : null,
+    );
     element("approve-button").disabled = !inspecting;
     element("reject-button").disabled = !inspecting;
 
@@ -244,6 +352,9 @@ export function createInterface() {
     } else if (view.phase === "feedback") {
       renderFeedback(view);
       openFlowDialog("feedback-dialog");
+    } else if (["shift-report", "complete"].includes(view.phase)) {
+      renderReport(view, savingAvailable);
+      openFlowDialog("report-dialog");
     } else {
       openFlowDialog(null);
     }
@@ -269,5 +380,99 @@ export function createInterface() {
     element("reject-dialog").showModal();
   }
 
-  return { render, openRejection };
+  function renderClock(remaining) {
+    const active = remaining !== null;
+    element("decision-clock").hidden = !active;
+    element("rejection-clock").hidden = !active;
+    if (!active) return;
+    const seconds = Math.ceil(Math.max(0, remaining) / 1000);
+    text("clock-seconds", seconds);
+    text("rejection-seconds", seconds);
+    element("clock-progress").value = Math.max(0, remaining) / 1000;
+    element("clock-progress").setAttribute(
+      "aria-valuetext",
+      `${seconds} seconds remaining`,
+    );
+    element("decision-clock").classList.toggle("urgent", seconds <= 5);
+    element("rejection-clock").classList.toggle("urgent", seconds <= 5);
+    if (seconds <= 5 && seconds > 0 && previousSeconds > 5)
+      text("clock-warning", `${seconds} seconds left to file this decision.`);
+    previousSeconds = seconds;
+  }
+
+  function renderRecords(records, mode) {
+    const name = getMode(mode).name;
+    text("records-caption", `${name} — ten best completed runs`);
+    for (const button of document.querySelectorAll("[data-record-mode]")) {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.recordMode === mode),
+      );
+    }
+    const rows = records.map((record, index) => {
+      const row = copyTemplate("record-template");
+      row.querySelector(".record-rank").textContent = pad(index + 1);
+      row.querySelector(".record-clerk").textContent = record.clerk;
+      row.querySelector(".record-points").textContent = String(
+        record.points,
+      ).padStart(3, "0");
+      row.querySelector(".record-accuracy").textContent =
+        record.count === null ? "—" : `${record.correct} / ${record.count}`;
+      row.querySelector(".record-date").textContent =
+        record.endedAt === null
+          ? "—"
+          : new Intl.DateTimeFormat("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "2-digit",
+            }).format(new Date(record.endedAt));
+      return row;
+    });
+    element("records-body").replaceChildren(...rows);
+    element("records-empty").hidden = rows.length > 0;
+    element("records-ledger").hidden = rows.length === 0;
+    text(
+      "records-empty",
+      `${name}: no appointments completed. There’s a blank line waiting for you.`,
+    );
+  }
+
+  function cancelApplicationSlide() {
+    applicationSlide?.cancel();
+    applicationSlide = null;
+  }
+
+  function slideApplication() {
+    cancelApplicationSlide();
+    const paper = element("application");
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typeof paper.animate !== "function"
+    )
+      return;
+    const motion = paper.animate(
+      [
+        { transform: "translateY(calc(-100% - 36px))" },
+        { transform: "translateY(0)" },
+      ],
+      {
+        duration: 560,
+        easing: "cubic-bezier(0.16, 0.72, 0.2, 1)",
+        fill: "none",
+      },
+    );
+    applicationSlide = motion;
+    motion.onfinish = () => {
+      if (applicationSlide === motion) applicationSlide = null;
+    };
+  }
+
+  return {
+    render,
+    openRejection,
+    renderClock,
+    renderRecords,
+    slideApplication,
+    cancelApplicationSlide,
+  };
 }

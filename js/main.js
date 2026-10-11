@@ -1,18 +1,17 @@
-import { createStorage } from "./storage.js";
-import { createAudioController } from "./audio.js";
 import { createCampaign, validateDefinition } from "./game.js";
+import { createStorage } from "./storage.js";
 import { createInterface } from "./ui.js";
+import { createAudioController } from "./audio.js";
 
 const storage = createStorage();
-
 const element = (id) => document.getElementById(id);
-
 let definition;
+let campaign = null;
+let ui;
+let screen = "menu";
+let recordMode = "normal";
 let ready = false;
 let loading = false;
-let campaign = null;
-let screen = "menu";
-let ui;
 
 const audio = createAudioController(
   {
@@ -51,78 +50,135 @@ function openSettings() {
   element("settings-dialog").showModal();
 }
 
-for (const id of ["settings-button", "desk-settings-button"]) {
-  element(id).addEventListener("click", openSettings);
+function resetSessionAfterClearing() {
+  campaign = null;
+  recordMode = "normal";
+  ui?.cancelApplicationSlide();
+  audio.resetSettings();
+  syncSettings();
+  closeDialogs();
+  screen = "menu";
+  renderMenu();
+  element("campaign-status").textContent =
+    "The filing cabinet is empty. Your next shift awaits.";
+  element("start-title").focus({ preventScroll: true });
 }
 
-element("close-settings-button").addEventListener("click", () => {
-  element("settings-dialog").close();
-});
-
-for (const channel of Object.keys(audio.getSettings())) {
-  element(`${channel}-enabled`).addEventListener("change", (event) => {
-    audio.setChannel(channel, { enabled: event.target.checked });
-    syncSettings();
-  });
-
-  element(`${channel}-volume`).addEventListener("input", (event) => {
-    audio.setChannel(channel, { volume: Number(event.target.value) });
-    syncSettings();
-  });
+function clearSavedData() {
+  if (!element("clear-data-dialog").open) return;
+  if (!storage.clearData()) {
+    element("clear-data-error").hidden = false;
+    return;
+  }
+  resetSessionAfterClearing();
 }
-
-document.addEventListener("pointerdown", () => audio.activate());
-document.addEventListener("keydown", () => audio.activate());
-
-syncSettings();
 
 function closeDialogs() {
-  for (const dialog of document.querySelectorAll("dialog[open]")) {
+  for (const dialog of document.querySelectorAll("dialog[open]"))
     dialog.close();
-  }
 }
 
-function openModeChooser() {
-  if (!ready || screen !== "menu") return;
+function renderMenu() {
+  element("start-screen").hidden = false;
+  element("campaign-screen").hidden = true;
+  element("desk-header").hidden = true;
+  element("desk-footer").hidden = true;
+  element("skip-link").setAttribute("href", "#start-title");
+  element("new-campaign-button").disabled = !ready;
+  element("honours-button").disabled = !ready;
+  const view = campaign?.getView();
+  element("continue-campaign-button").disabled =
+    !ready || !view || view.phase === "complete";
+  const bestScore = storage.loadBest();
+  element("menu-best-score").textContent =
+    bestScore === null ? "—" : String(bestScore).padStart(3, "0");
+  element("campaign-status").hidden = !ready;
+  let message = view
+    ? view.phase === "complete"
+      ? `${view.modeDetails.name} run complete. A fresh stack of paperwork awaits.`
+      : view.runEnded
+        ? `${view.modeDetails.name} run closed. Continue to collect your final report.`
+        : `${view.modeDetails.name} · Shift ${view.shiftIndex + 1}${view.shiftCount === null ? "" : ` of ${view.shiftCount}`} · ${view.totals.count} applications filed · ${view.totals.points} points.${view.modeDetails.endless ? ` ${view.mistakes}/3 audit warnings.` : view.modeDetails.timed && view.phase === "inspection" ? ` Clock paused at ${Math.ceil(campaign.timeRemaining() / 1000)}s.` : ""}`
+    : "No campaign on file. Your first shift awaits.";
+  if (!storage.isAvailable())
+    message += " Progress is available during this visit only.";
+  element("campaign-status").textContent = message;
+}
 
+function refresh() {
+  if (!campaign || screen !== "desk") return;
+  const view = campaign.getView();
+  if (view.runEnded) {
+    storage.saveRecord({
+      runId: view.runId,
+      mode: view.mode,
+      clerk: view.clerk,
+      startedAt: view.startedAt,
+      endedAt: view.endedAt,
+      ...view.totals,
+      mistakes: view.mistakes,
+    });
+    if (view.mode === "normal") storage.saveBest(view.totals.points);
+  }
+  storage.saveProgress(campaign.snapshot());
+  ui.render(view, storage.loadBest(view.mode), storage.isAvailable());
+  ui.renderClock(campaign.timeRemaining());
+}
+
+function showMenu() {
+  ui?.cancelApplicationSlide();
+  if (campaign) {
+    campaign.pauseClock();
+    storage.saveProgress(campaign.snapshot());
+  }
   closeDialogs();
-  element("mode-form").reset();
-  element("clerk-input").value = campaign?.getView().clerk ?? "";
-  element("mode-dialog").showModal();
+  screen = "menu";
+  renderMenu();
+  element("start-title").focus({ preventScroll: true });
+}
+
+function openDesk() {
+  if (!ready || !campaign) return;
+  closeDialogs();
+  screen = "desk";
+  element("start-screen").hidden = true;
+  element("campaign-screen").hidden = false;
+  element("desk-header").hidden = false;
+  element("desk-footer").hidden = false;
+  element("skip-link").setAttribute("href", "#application");
+  campaign.resumeClock();
+  refresh();
+  tickClock();
+  if (campaign.getView().phase === "inspection")
+    element("application").focus({ preventScroll: true });
 }
 
 async function loadCampaign() {
   if (loading) return;
-
   loading = true;
   ready = false;
-  element("new-campaign-button").disabled = true;
+  renderMenu();
   element("loading-state").hidden = false;
-  element("campaign-status").hidden = true;
   element("error-state").hidden = true;
   element("retry-button").disabled = true;
   element("game").setAttribute("aria-busy", "true");
-
   try {
     const response = await fetch(
       new URL("../data/applications.json", import.meta.url),
     );
-
-    if (!response.ok) {
+    if (!response.ok)
       throw new Error(
         `The applications could not be retrieved (HTTP ${response.status}).`,
       );
-    }
-
     definition = await response.json();
     validateDefinition(definition);
-    ui = createInterface();
-
+    const saved = storage.loadProgress();
+    const restored = saved ? createCampaign(definition, saved) : null;
+    campaign = restored?.getView().restored ? restored : null;
+    campaign?.pauseClock();
+    ui = createInterface(definition);
     ready = true;
-    element("new-campaign-button").disabled = false;
-    element("campaign-status").textContent =
-      "No campaign on file. Your first shift awaits.";
-    element("campaign-status").hidden = false;
+    renderMenu();
   } catch (error) {
     element("error-state").hidden = false;
     element("error-message").textContent =
@@ -135,168 +191,230 @@ async function loadCampaign() {
   }
 }
 
-function renderMenu() {
-  element("start-screen").hidden = false;
-  element("campaign-screen").hidden = true;
-  element("desk-header").hidden = true;
-  element("desk-footer").hidden = true;
-  element("skip-link").setAttribute("href", "#start-title");
-  element("new-campaign-button").disabled = !ready;
-
-  const view = campaign?.getView();
-
-  element("continue-campaign-button").disabled =
-    !ready || !view || view.phase === "complete";
-  element("campaign-status").hidden = !ready;
-  element("campaign-status").textContent = view
-    ? `${view.modeDetails.name} · Shift ${view.shiftIndex + 1}${
-        view.shiftCount === null ? "" : ` of ${view.shiftCount}`
-      } · ${view.totals.count} applications filed · ${view.totals.points} points.`
-    : "No campaign on file. Your first shift awaits.";
-}
-
 function finishInspection(decision, reasons = []) {
   if (screen !== "desk") return;
-
   const result = campaign?.submit(decision, reasons);
   if (!result) return;
-
   if (!result.timedOut) audio.playStamp();
-
-  if (element("reject-dialog").open) {
-    element("reject-dialog").close();
-  }
-
+  if (element("reject-dialog").open) element("reject-dialog").close();
   refresh();
-}
-
-function openRejection() {
-  if (screen !== "desk" || campaign?.getView().phase !== "inspection") {
-    return;
-  }
-
-  if (campaign.expire()) {
-    refresh();
-    return;
-  }
-
-  ui.openRejection(campaign.getView());
 }
 
 function advance() {
   if (screen !== "desk" || !campaign?.advance()) return;
-
   refresh();
-
   if (campaign.getView().phase === "inspection") {
-    element("application").focus({ preventScroll: true });
+    presentApplication();
   }
 }
 
-function refresh() {
-  if (!campaign || screen !== "desk") return;
-
-  ui.render(campaign.getView());
+function presentApplication() {
+  ui.slideApplication();
+  audio.playPaper();
+  element("application").focus({ preventScroll: true });
 }
 
-function openDesk() {
-  if (!ready || !campaign) return;
-
+function openModeChooser() {
+  if (!ready) return;
   closeDialogs();
-  screen = "desk";
-  element("start-screen").hidden = true;
-  element("campaign-screen").hidden = false;
-  element("desk-header").hidden = false;
-  element("desk-footer").hidden = false;
-  element("skip-link").setAttribute("href", "#application");
-  campaign.resumeClock();
-
-  refresh();
-
-  if (campaign.getView().phase === "inspection") {
-    element("application").focus({ preventScroll: true });
-  }
+  element("mode-form").reset();
+  element("clerk-input").value = campaign?.getView().clerk ?? "";
+  element("mode-dialog").showModal();
 }
 
-function showMenu() {
-  campaign?.pauseClock();
-  closeDialogs();
-  screen = "menu";
-  renderMenu();
-  element("start-title").focus({ preventScroll: true });
+function tickClock() {
+  if (screen !== "desk" || !campaign) return;
+  const remaining = campaign.timeRemaining();
+  if (remaining === null) return;
+  if (remaining <= 0) {
+    if (campaign.expire()) refresh();
+  } else ui.renderClock(remaining);
 }
 
-element("new-campaign-button").addEventListener("click", openModeChooser);
+function openRejection() {
+  if (screen !== "desk") return;
+  tickClock();
+  if (campaign?.getView().phase !== "inspection") return;
+  ui.openRejection(campaign.getView());
+  ui.renderClock(campaign.timeRemaining());
+}
 
-element("cancel-mode-button").addEventListener("click", () => {
-  element("mode-dialog").close();
+function renderHonours() {
+  ui.renderRecords(storage.loadRecords(recordMode), recordMode);
+  element("records-status").textContent = storage.isAvailable()
+    ? "These records belong to this browser. A fresh campaign keeps them on file."
+    : "Records are available for this visit. Saving is unavailable in this browser.";
+}
+
+element("new-campaign-button").addEventListener("click", () => {
+  if (!ready) return;
+  if (campaign && !campaign.getView().runEnded)
+    element("restart-dialog").showModal();
+  else openModeChooser();
 });
-
 element("mode-form").addEventListener("submit", (event) => {
   event.preventDefault();
-
   if (!ready || !element("mode-dialog").open) return;
-
   const form = new FormData(event.currentTarget);
-
   campaign = createCampaign(definition, null, Math.random, {
     mode: form.get("mode"),
     clerk: form.get("clerk"),
   });
-
   openDesk();
 });
-
-element("menu-button").addEventListener("click", showMenu);
-
-element("continue-campaign-button").addEventListener("click", () => {
-  if (campaign && campaign.getView().phase !== "complete") {
-    openDesk();
-  }
+element("cancel-mode-button").addEventListener("click", () =>
+  element("mode-dialog").close(),
+);
+element("honours-button").addEventListener("click", () => {
+  if (!ready) return;
+  recordMode = campaign?.getView().mode ?? "normal";
+  renderHonours();
+  element("honours-dialog").showModal();
 });
-
-element("retry-button").addEventListener("click", loadCampaign);
-
-for (const button of document.querySelectorAll("[data-main-menu]")) {
+for (const button of document.querySelectorAll("[data-record-mode]"))
+  button.addEventListener("click", () => {
+    recordMode = button.dataset.recordMode;
+    renderHonours();
+  });
+element("close-honours-button").addEventListener("click", () =>
+  element("honours-dialog").close(),
+);
+element("continue-campaign-button").addEventListener("click", () => {
+  if (campaign && campaign.getView().phase !== "complete") openDesk();
+});
+element("menu-button").addEventListener("click", showMenu);
+for (const button of document.querySelectorAll("[data-main-menu]"))
   button.addEventListener("click", showMenu);
-}
 
 element("begin-shift-button").addEventListener("click", () => {
   if (screen !== "desk" || !campaign?.startShift()) return;
-
   refresh();
-  element("application").focus({ preventScroll: true });
+  presentApplication();
 });
-
-for (const id of ["briefing-dialog", "feedback-dialog"]) {
-  element(id).addEventListener("cancel", (event) => {
-    event.preventDefault();
-  });
-}
-
-element("approve-button").addEventListener("click", () => {
-  finishInspection("approve");
-});
-
-element("next-applicant-button").addEventListener("click", advance);
-
+element("approve-button").addEventListener("click", () =>
+  finishInspection("approve"),
+);
 element("reject-button").addEventListener("click", openRejection);
-
-element("cancel-rejection-button").addEventListener("click", () => {
-  element("reject-dialog").close();
-});
-
+element("cancel-rejection-button").addEventListener("click", () =>
+  element("reject-dialog").close(),
+);
 element("rejection-form").addEventListener("submit", (event) => {
   event.preventDefault();
-
   const reasons = new FormData(event.currentTarget).getAll("reasons");
-
   if (!reasons.length) {
     element("rejection-error").hidden = false;
     return;
   }
-
   finishInspection("reject", reasons);
+});
+element("next-applicant-button").addEventListener("click", advance);
+element("report-continue-button").addEventListener("click", () => {
+  if (campaign?.getView().phase === "complete") showMenu();
+  else advance();
+});
+element("help-button").addEventListener("click", () =>
+  element("help-dialog").showModal(),
+);
+element("close-help-button").addEventListener("click", () =>
+  element("help-dialog").close(),
+);
+element("cancel-restart-button").addEventListener("click", () =>
+  element("restart-dialog").close(),
+);
+element("confirm-restart-button").addEventListener("click", openModeChooser);
+element("retry-button").addEventListener("click", loadCampaign);
+
+for (const id of ["settings-button", "desk-settings-button"])
+  element(id).addEventListener("click", openSettings);
+element("close-settings-button").addEventListener("click", () =>
+  element("settings-dialog").close(),
+);
+element("clear-data-button").addEventListener("click", () => {
+  element("clear-data-error").hidden = true;
+  element("clear-data-dialog").showModal();
+});
+element("cancel-clear-data-button").addEventListener("click", () =>
+  element("clear-data-dialog").close(),
+);
+element("confirm-clear-data-button").addEventListener("click", clearSavedData);
+for (const channel of Object.keys(audio.getSettings())) {
+  element(`${channel}-enabled`).addEventListener("change", (event) => {
+    audio.setChannel(channel, { enabled: event.target.checked });
+    syncSettings();
+  });
+  element(`${channel}-volume`).addEventListener("input", (event) => {
+    audio.setChannel(channel, { volume: Number(event.target.value) });
+    syncSettings();
+  });
+}
+document.addEventListener("pointerdown", () => audio.activate());
+document.addEventListener("keydown", () => audio.activate());
+syncSettings();
+for (const id of ["briefing-dialog", "feedback-dialog", "report-dialog"]) {
+  element(id).addEventListener("cancel", (event) => event.preventDefault());
+}
+
+document.addEventListener("keydown", (event) => {
+  if (
+    screen !== "desk" ||
+    event.repeat ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey ||
+    !campaign
+  )
+    return;
+  if (element("settings-dialog").open || element("help-dialog").open) return;
+  const phase = campaign.getView().phase;
+  if (
+    element("feedback-dialog").open &&
+    phase === "feedback" &&
+    event.key === "Enter" &&
+    !event.target.closest("[data-main-menu]")
+  ) {
+    event.preventDefault();
+    advance();
+    return;
+  }
+  if (document.querySelector("dialog[open]") || phase !== "inspection") return;
+  if (event.target.matches("input, textarea, select")) return;
+  const key = event.key.toLowerCase();
+  if (key === "a") {
+    event.preventDefault();
+    finishInspection("approve");
+  } else if (key === "r") {
+    event.preventDefault();
+    openRejection();
+  }
+});
+window.setInterval(tickClock, 100);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) tickClock();
+});
+window.addEventListener("pagehide", () => {
+  ui?.cancelApplicationSlide();
+  if (campaign) {
+    campaign.pauseClock();
+    storage.saveProgress(campaign.snapshot());
+  }
+});
+window.addEventListener("pageshow", () => {
+  if (screen === "desk" && campaign) {
+    campaign.resumeClock();
+    tickClock();
+  }
+});
+
+window.addEventListener("storage", (event) => {
+  if (event.key !== null && !event.key.startsWith("bureau-of-nonsense:"))
+    return;
+  storage.invalidateCache();
+  if (event.newValue === null) {
+    resetSessionAfterClearing();
+  } else if (screen === "menu") {
+    renderMenu();
+    if (element("honours-dialog").open) renderHonours();
+  }
 });
 
 loadCampaign();

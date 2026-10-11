@@ -3,11 +3,34 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#294643" />
+    <meta
+      name="description"
+      content="Inspect improbable applications, apply exceedingly specific regulations, and earn your place on the Roll of Honour at the Bureau of Nonsense."
+    />
     <title>The Bureau of Nonsense</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link
+      rel="preload"
+      href="assets/fonts/Caveat-Variable.woff"
+      as="font"
+      type="font/woff"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="assets/fonts/SpecialElite-Regular.woff"
+      as="font"
+      type="font/woff"
+      crossorigin
+    />
     <link rel="stylesheet" href="css/style.css" />
     <script type="module" src="js/main.js"></script>
   </head>
   <body>
+    <a id="skip-link" class="skip-link" href="#start-title"
+      >Skip to main content</a
+    >
     <div class="bureau-shell">
       <header id="desk-header" class="bureau-header" hidden>
         <div class="identity">
@@ -18,6 +41,9 @@
           </div>
         </div>
         <div class="header-actions">
+          <button id="help-button" class="text-button" type="button">
+            Clerk's handbook
+          </button>
           <button id="desk-settings-button" class="text-button" type="button">
             Settings
           </button>
@@ -108,7 +134,7 @@
             </section>
             <div class="start-bottomline">
               <span
-                >BEST NORMAL RUN <strong id="menu-best-score">-</strong></span
+                >BEST NORMAL RUN <strong id="menu-best-score">—</strong></span
               >
               <span>Every stamp leaves a paper trail.</span>
             </div>
@@ -144,7 +170,17 @@
               <span aria-hidden="true"> / </span>
               <span id="clerk-name">A. Clerk</span>
             </p>
+            <p id="audit-warnings" class="audit-warnings" hidden>
+              <span id="warning-count">0 of 3 audit warnings</span>
+              <span class="warning-marks" aria-hidden="true"
+                ><i></i><i></i><i></i
+              ></span>
+            </p>
           </div>
+          <p id="storage-warning" class="storage-warning" role="status" hidden>
+            Saving is unavailable in this browser. Your current campaign will
+            continue, but progress will not survive a refresh.
+          </p>
           <div id="desk-layout" class="desk-layout" hidden>
             <aside class="rulebook" aria-labelledby="rulebook-heading">
               <details id="rulebook-panel" open>
@@ -211,12 +247,33 @@
                 </article>
               </div>
               <div class="decision-controls" aria-label="Application decision">
+                <div
+                  id="decision-clock"
+                  class="decision-clock"
+                  role="timer"
+                  aria-live="off"
+                  hidden
+                >
+                  <div>
+                    <span>Decision due in</span
+                    ><strong><span id="clock-seconds">20</span>s</strong>
+                  </div>
+                  <progress
+                    id="clock-progress"
+                    max="20"
+                    value="20"
+                    aria-label="Time remaining"
+                  ></progress>
+                </div>
+                <span id="clock-warning" class="sr-only" role="status"></span>
+
                 <button
                   id="approve-button"
                   class="stamp-button approve-button"
                   type="button"
                 >
                   <span>Approve</span>
+                  <kbd>A</kbd>
                 </button>
                 <button
                   id="reject-button"
@@ -224,6 +281,7 @@
                   type="button"
                 >
                   <span>Reject</span>
+                  <kbd>R</kbd>
                 </button>
               </div>
 
@@ -438,7 +496,7 @@
 
       <fieldset class="audio-setting">
         <legend>Music</legend>
-        <p id="music-description">The Five-Floor Goodbye - Ryan Ike.</p>
+        <p id="music-description">The Five-Floor Goodbye — Ryan Ike.</p>
         <label class="audio-toggle">
           <input id="music-enabled" type="checkbox" checked />
           <span>Music on</span>
@@ -512,6 +570,21 @@
         />
       </fieldset>
 
+      <section class="settings-data" aria-labelledby="settings-data-title">
+        <h3 id="settings-data-title">The filing cabinet.</h3>
+        <p>
+          Remove all saved Bureau data, including your campaign, completed runs
+          and sound preferences.
+        </p>
+        <button
+          id="clear-data-button"
+          class="primary-button danger-button"
+          type="button"
+        >
+          Clear saved data
+        </button>
+      </section>
+
       <p id="settings-status" class="settings-status" role="status">
         Your preferences stay with this browser.
       </p>
@@ -568,6 +641,16 @@
       <h2 id="reject-title">Cite the regulations.</h2>
       <p class="dialog-lead">Select every rule this application breaks.</p>
 
+      <p
+        id="rejection-clock"
+        class="rejection-clock"
+        role="timer"
+        aria-live="off"
+        hidden
+      >
+        <strong><span id="rejection-seconds">20</span>s</strong> to file the
+        decision. The clock is still running.
+      </p>
       <form id="rejection-form">
         <fieldset>
           <legend class="sr-only">Broken regulations</legend>
@@ -592,6 +675,224 @@
           </button>
         </div>
       </form>
+    </dialog>
+
+    <dialog
+      id="report-dialog"
+      class="bureau-dialog report-dialog"
+      aria-labelledby="report-title"
+    >
+      <div class="dialog-topline">
+        <span>CLERK PERFORMANCE REVIEW</span><span id="report-code"></span>
+      </div>
+      <p class="eyebrow" id="report-label"></p>
+      <h2 id="report-title"></h2>
+      <p id="report-message" class="dialog-lead"></p>
+      <div class="report-metrics">
+        <div><span>Points</span><strong id="report-score"></strong></div>
+        <div>
+          <span>Correct decisions</span><strong id="report-accuracy"></strong>
+        </div>
+        <div>
+          <span>Perfect inspections</span><strong id="report-perfect"></strong>
+        </div>
+      </div>
+      <div class="audit-heading">
+        <h3>The paper trail</h3>
+        <span>Click a case to review it</span>
+      </div>
+      <div id="audit-list" class="audit-list"></div>
+      <div class="dialog-actions">
+        <button
+          id="report-menu-button"
+          class="secondary-button"
+          type="button"
+          data-main-menu
+        >
+          Main menu</button
+        ><button
+          id="report-continue-button"
+          class="primary-button"
+          type="button"
+          autofocus
+        >
+          Next shift
+        </button>
+      </div>
+    </dialog>
+
+    <dialog id="help-dialog" class="bureau-dialog" aria-labelledby="help-title">
+      <p class="eyebrow">Clerk's handbook / Edition 04</p>
+      <h2 id="help-title">A stamp is a responsibility.</h2>
+      <ol class="handbook-list">
+        <li>
+          Read the current department's regulations. Rules change between
+          shifts.
+        </li>
+        <li>
+          Compare every regulated field with the rulebook. An applicant's
+          statement is flavour, not evidence.
+        </li>
+        <li>
+          Approve applications that meet every rule. Reject the others and
+          select every broken rule.
+        </li>
+        <li>
+          A correct decision earns 10 points. A fully justified inspection earns
+          another 5.
+        </li>
+        <li>
+          Normal has no timer. Under Pressure gives you 20 seconds per
+          application, including rejection reasons; a missed deadline earns no
+          points. Main menu pauses the clock.
+        </li>
+        <li>
+          Never-ending Paperwork has no timer. The third wrong verdict ends your
+          run. Incomplete rejection reasons only cost bonus points.
+        </li>
+        <li>Your progress and the Roll of Honour stay in this browser.</li>
+      </ol>
+      <div class="shortcut-list">
+        <span><kbd>A</kbd> Approve</span><span><kbd>R</kbd> Reject</span
+        ><span><kbd>Enter</kbd> Continue after feedback</span>
+      </div>
+      <button id="close-help-button" class="primary-button" type="button">
+        Back to work
+      </button>
+    </dialog>
+    <dialog
+      id="restart-dialog"
+      class="bureau-dialog"
+      aria-labelledby="restart-title"
+    >
+      <p class="eyebrow">Fresh paperwork</p>
+      <h2 id="restart-title">Start a new campaign?</h2>
+      <p class="dialog-lead">
+        Your current run will be replaced. Completed runs stay on the Roll of
+        Honour.
+      </p>
+      <div class="dialog-actions">
+        <button
+          id="cancel-restart-button"
+          class="secondary-button"
+          type="button"
+        >
+          Keep this run</button
+        ><button
+          id="confirm-restart-button"
+          class="primary-button"
+          type="button"
+        >
+          Choose mode
+        </button>
+      </div>
+    </dialog>
+
+    <dialog
+      id="honours-dialog"
+      class="bureau-dialog honours-dialog"
+      aria-labelledby="honours-title"
+    >
+      <div class="dialog-topline">
+        <span>THE OFFICE RECORD BOOK</span
+        ><span>TOP TEN / EACH APPOINTMENT</span>
+      </div>
+      <p class="eyebrow">Filed with considerable pride.</p>
+      <h2 id="honours-title">The Roll of Honour.</h2>
+      <p class="dialog-lead">For clerks who left their mark.</p>
+      <div
+        class="record-filters"
+        role="group"
+        aria-label="Show records by campaign mode"
+      >
+        <button
+          class="record-filter"
+          type="button"
+          data-record-mode="normal"
+          aria-pressed="true"
+        >
+          Normal</button
+        ><button
+          class="record-filter"
+          type="button"
+          data-record-mode="hard"
+          aria-pressed="false"
+        >
+          Under Pressure</button
+        ><button
+          class="record-filter"
+          type="button"
+          data-record-mode="endless"
+          aria-pressed="false"
+        >
+          Never-ending Paperwork
+        </button>
+      </div>
+      <p id="records-empty" class="records-empty" role="status">
+        No appointments completed. There’s a blank line waiting for you.
+      </p>
+      <div id="records-ledger" class="records-ledger" hidden>
+        <table class="ledger-table">
+          <caption id="records-caption" class="sr-only">
+            Normal — ten best completed runs
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">No.</th>
+              <th scope="col">Clerk</th>
+              <th scope="col">Points</th>
+              <th scope="col">Correct / filed</th>
+              <th scope="col" class="record-date-column">Filed on</th>
+            </tr>
+          </thead>
+          <tbody id="records-body"></tbody>
+        </table>
+      </div>
+      <p id="records-status" class="mode-footnote">
+        These records belong to this browser. A fresh campaign keeps them on
+        file.
+      </p>
+      <div class="dialog-actions">
+        <button id="close-honours-button" class="primary-button" type="button">
+          Close the book
+        </button>
+      </div>
+    </dialog>
+
+    <dialog
+      id="clear-data-dialog"
+      class="bureau-dialog"
+      aria-labelledby="clear-data-title"
+      aria-describedby="clear-data-description"
+    >
+      <p class="eyebrow">Empty the filing cabinet</p>
+      <h2 id="clear-data-title">Delete saved Bureau data?</h2>
+      <p id="clear-data-description" class="dialog-lead">
+        This permanently deletes your saved campaign, Roll of Honour and sound
+        preferences from this browser. Your current run will end and you will
+        return to the main menu.
+      </p>
+      <p id="clear-data-error" class="form-error" role="status" hidden>
+        The browser could not remove the saved data. Your current session has
+        been kept. Check that browser storage is allowed, then try again.
+      </p>
+      <div class="dialog-actions">
+        <button
+          id="cancel-clear-data-button"
+          class="secondary-button"
+          type="button"
+          autofocus
+        >
+          Keep my records
+        </button>
+        <button
+          id="confirm-clear-data-button"
+          class="primary-button danger-button"
+          type="button"
+        >
+          Delete saved data
+        </button>
+      </div>
     </dialog>
 
     <audio
@@ -653,5 +954,37 @@
         </span>
       </label>
     </template>
+    <template id="field-template">
+      <div class="document-field">
+        <dt class="field-label"></dt>
+        <dd></dd>
+      </div>
+    </template>
+    <template id="audit-template">
+      <details class="audit-item">
+        <summary>
+          <span class="audit-name"></span><span class="audit-result"></span>
+        </summary>
+        <div class="audit-body">
+          <p class="audit-decision"></p>
+          <div class="audit-explanations"></div>
+        </div>
+      </details>
+    </template>
+    <template id="record-template">
+      <tr>
+        <td class="record-rank"></td>
+        <th class="record-clerk" scope="row"></th>
+        <td class="record-points"></td>
+        <td class="record-accuracy"></td>
+        <td class="record-date record-date-column"></td>
+      </tr>
+    </template>
+    <noscript
+      ><p class="noscript">
+        This desk needs JavaScript to inspect applications. Please enable it and
+        reload.
+      </p></noscript
+    >
   </body>
 </html>
