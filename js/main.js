@@ -335,6 +335,32 @@ for (const id of ["settings-button", "desk-settings-button"])
 element("close-settings-button").addEventListener("click", () =>
   element("settings-dialog").close(),
 );
+const settingsDialog = element("settings-dialog");
+let settingsClickStartedOutside = false;
+
+function isOutsideSettings(event) {
+  const bounds = settingsDialog.getBoundingClientRect();
+
+  return (
+    event.target === settingsDialog &&
+    (event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom)
+  );
+}
+
+settingsDialog.addEventListener("pointerdown", (event) => {
+  settingsClickStartedOutside = isOutsideSettings(event);
+});
+
+settingsDialog.addEventListener("click", (event) => {
+  if (settingsClickStartedOutside && isOutsideSettings(event)) {
+    settingsDialog.close();
+  }
+
+  settingsClickStartedOutside = false;
+});
 element("clear-data-button").addEventListener("click", () => {
   element("clear-data-error").hidden = true;
   element("clear-data-dialog").showModal();
