@@ -9,25 +9,36 @@ const CHANNELS = Object.keys(DEFAULTS);
 const LOOPS = ["atmosphere", "music"];
 
 export function normalizeAudioSettings(value) {
-  return Object.fromEntries(
-    CHANNELS.map((channel) => {
-      const saved = value?.[channel];
-      const defaults = DEFAULTS[channel];
-      return [
-        channel,
-        {
-          enabled:
-            typeof saved?.enabled === "boolean"
-              ? saved.enabled
-              : defaults.enabled,
-          volume:
-            typeof saved?.volume === "number" && Number.isFinite(saved.volume)
-              ? Math.round(Math.min(100, Math.max(0, saved.volume)))
-              : defaults.volume,
-        },
-      ];
-    }),
-  );
+  const masterVolume = value?.masterVolume;
+
+  return {
+    masterEnabled:
+      typeof value?.masterEnabled === "boolean" ? value.masterEnabled : true,
+    masterVolume:
+      typeof masterVolume === "number" && Number.isFinite(masterVolume)
+        ? Math.round(Math.min(100, Math.max(0, masterVolume)))
+        : 100,
+    ...Object.fromEntries(
+      CHANNELS.map((channel) => {
+        const saved = value?.[channel];
+        const defaults = DEFAULTS[channel];
+
+        return [
+          channel,
+          {
+            enabled:
+              typeof saved?.enabled === "boolean"
+                ? saved.enabled
+                : defaults.enabled,
+            volume:
+              typeof saved?.volume === "number" && Number.isFinite(saved.volume)
+                ? Math.round(Math.min(100, Math.max(0, saved.volume)))
+                : defaults.volume,
+          },
+        ];
+      }),
+    ),
+  };
 }
 
 export function createAudioController(
@@ -55,8 +66,9 @@ export function createAudioController(
       const player = players[channel];
       if (!player) continue;
       const preference = settings[channel];
-      player.volume = preference.volume / 100;
-      player.muted = !preference.enabled || preference.volume === 0;
+      player.volume = (preference.volume / 100) * (settings.masterVolume / 100);
+      player.muted =
+        !settings.masterEnabled || !preference.enabled || player.volume === 0;
       if (!activated || player.muted || !hasSource(player)) {
         player.pause();
       } else if (LOOPS.includes(channel) && player.paused) {
@@ -88,6 +100,18 @@ export function createAudioController(
     onChange(getSettings());
   }
 
+  function setMasterVolume(volume) {
+    settings = normalizeAudioSettings({ ...settings, masterVolume: volume });
+    apply();
+    onChange(getSettings());
+  }
+
+  function setMasterEnabled(enabled) {
+    settings = normalizeAudioSettings({ ...settings, masterEnabled: enabled });
+    apply();
+    onChange(getSettings());
+  }
+
   for (const player of Object.values(players)) {
     player?.addEventListener("canplay", apply);
   }
@@ -96,6 +120,8 @@ export function createAudioController(
   return {
     getSettings,
     setChannel,
+    setMasterEnabled,
+    setMasterVolume,
     resetSettings: () => {
       settings = normalizeAudioSettings(null);
       apply();

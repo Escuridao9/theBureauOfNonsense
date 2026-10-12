@@ -473,6 +473,31 @@
       <h2 id="settings-title">Set the mood.</h2>
       <p class="dialog-lead">Give the room its own rhythm.</p>
       <fieldset class="audio-setting">
+        <legend>Master volume</legend>
+        <p id="master-description">Adjust all sounds together</p>
+        <label class="audio-toggle">
+          <input id="master-enabled" type="checkbox" checked />
+          <span>All sounds on</span>
+        </label>
+        <div class="volume-heading">
+          <label for="master-volume">Volume</label>
+          <output id="master-volume-output" for="master-volume">100%</output>
+        </div>
+
+        <input
+          id="master-volume"
+          class="volume-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="100"
+          aria-describedby="master-description"
+          aria-label="Master volume"
+        />
+      </fieldset>
+
+      <fieldset class="audio-setting">
         <legend>Atmosphere sounds</legend>
         <p id="atmosphere-description">
           A quiet office, with traffic somewhere outside.

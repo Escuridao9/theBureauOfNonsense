@@ -30,8 +30,14 @@ const audio = createAudioController(
 );
 
 function syncSettings() {
-  const settings = audio.getSettings();
-  for (const [channel, preference] of Object.entries(settings)) {
+  const { masterEnabled, masterVolume, ...channels } = audio.getSettings();
+
+  element("master-enabled").checked = masterEnabled;
+  element("master-volume").value = masterVolume;
+  element("master-volume").setAttribute("aria-valuetext", `${masterVolume}%`);
+  element("master-volume-output").value = `${masterVolume}%`;
+
+  for (const [channel, preference] of Object.entries(channels)) {
     element(`${channel}-enabled`).checked = preference.enabled;
     element(`${channel}-volume`).value = preference.volume;
     element(`${channel}-volume`).setAttribute(
@@ -337,11 +343,20 @@ element("cancel-clear-data-button").addEventListener("click", () =>
   element("clear-data-dialog").close(),
 );
 element("confirm-clear-data-button").addEventListener("click", clearSavedData);
-for (const channel of Object.keys(audio.getSettings())) {
+element("master-enabled").addEventListener("change", (event) => {
+  audio.setMasterEnabled(event.target.checked);
+  syncSettings();
+});
+element("master-volume").addEventListener("input", (event) => {
+  audio.setMasterVolume(Number(event.target.value));
+  syncSettings();
+});
+for (const channel of ["atmosphere", "music", "effects", "paper"]) {
   element(`${channel}-enabled`).addEventListener("change", (event) => {
     audio.setChannel(channel, { enabled: event.target.checked });
     syncSettings();
   });
+
   element(`${channel}-volume`).addEventListener("input", (event) => {
     audio.setChannel(channel, { volume: Number(event.target.value) });
     syncSettings();
