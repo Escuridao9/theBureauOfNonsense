@@ -85,5 +85,3 @@ If browser storage is unavailable, the current visit remains playable and the in
 
 - Music: **The Five-Floor Goodbye**, by **Ryan Ike**, from the **Gunpoint** soundtrack.
 - Fonts: **Caveat** and **Special Elite**. Their license files are included in `assets/fonts/`.
-- Project: **Diogo Gomes** — [Escuridao9](https://github.com/Escuridao9).
-
