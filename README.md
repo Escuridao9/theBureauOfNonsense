@@ -2,11 +2,7 @@
 
 The Bureau of Nonsense is a browser game about inspecting improbable applications under exceedingly specific regulations. Read the rulebook, approve compliant requests, or reject them and cite every broken rule.
 
-Its desk combines handwritten typography, paper forms, stamps and a familiar office atmosphere. The project was developed with HTML5, CSS3 and JavaScript ES6+ for the practical assignment **Dynamic Web Application**.
-
-**[Play on GitHub Pages](https://escuridao9.github.io/theBureauOfNonsense/)**
-
-**[Source repository](https://github.com/Escuridao9/theBureauOfNonsense)**
+Its desk combines handwritten typography, paper forms, stamps and a familiar office atmosphere. The project was developed with HTML5, CSS3 and JavaScript ES6+.
 
 ## Features
 
@@ -53,16 +49,6 @@ The Main menu pauses the timer in Under Pressure. The rejection form, Settings a
 
 Shortcuts respect active forms and dialogs, so typing in an input does not stamp an application.
 
-## Run locally
-
-1. Clone or download the repository and open its folder in Visual Studio Code.
-2. Install the [Live Server extension](https://github.com/ritwickdey/vscode-live-server).
-3. Right-click `index.html` and select **Open with Live Server**.
-
-The game opens in your browser through a local HTTP server. Serve the project over HTTP rather than opening `index.html` directly, because it uses JavaScript modules and loads its application data with `fetch()`.
-
-The game has no build step and needs no framework or installed JavaScript dependencies.
-
 ## Saved data and Settings
 
 Progress, completed records, the best Normal score and sound preferences are stored in this browser's `localStorage`. **Continue Campaign** restores an unfinished run, including briefings, applications, receipts and shift reports. Starting a new campaign preserves completed records.
@@ -95,32 +81,7 @@ If browser storage is unavailable, the current visit remains playable and the in
 | `data/applications.json` | Departments, regulations and applicants. |
 | `assets/` | Fonts, sound files, font licenses and the favicon. |
 
-## Assignment requirements
-
-| Requirement | Implementation |
-| --- | --- |
-| **1. Logic and control flow** | Conditions and loops control campaign phases and decisions. `switch` handles field and rule types. `map()` builds rendered lists, `filter()` finds violations and `reduce()` calculates totals. |
-| **2. Simple data manipulation** | Clerk names and regulation values are normalized; numbers and dates use `Intl`; boolean fields are converted to readable labels; volumes are validated and bounded. |
-| **3. Complex data manipulation** | Object spread, copied arrays and `structuredClone()` protect state and returned data. Record ranking sorts a copied array, while filtering and adding records produces new collections. |
-| **4. Dynamic DOM creation** | HTML templates are cloned and populated in `ui.js`. Rule cards are inserted with `appendChild()`; other generated collections use `replaceChildren()`. |
-| **5. Reactivity and events** | Clicks, form submissions, keyboard shortcuts, volume inputs, toggles and record filters update the interface. Scores, timers and warning marks reflect the current run. |
-| **6. Scope and closures** | Module scope and factory functions encapsulate campaign state, the storage ledger and audio preferences. Internal values remain accessible through controlled public methods. |
-| **7. Asynchronous loading** | `main.js` loads `data/applications.json` with `fetch()` and `async/await`, checks the response and handles failures with `try/catch`, an error state and a retry button. |
-| **8. Modularization and reuse** | Seven JavaScript modules use `import` and `export`. Shared functions handle formatting, assessment, mode definitions, storage, audio and rendering. |
-| **Required persistence** | `localStorage` saves campaign progress, completed records and sound preferences. |
-| **GitHub delivery** | The source is hosted in the public repository linked above, with a GitHub Pages link and local run instructions in this README. |
-
-The assignment accepts a local JSON file as the asynchronous data source and allows either `localStorage` or `sessionStorage` for persistence. An external API and use of both storage mechanisms are not required.
-
-## Verification
-
-Development verification included 48 automated checks covering regulations, scoring, restoration, all three modes, deadlines, records, audio preferences and data deletion.
-
-Browser checks cover complete campaigns, reload/Continue, timed deadlines, Endless warnings, data deletion across tabs, unavailable storage, native audio decoding, reduced motion and layouts from 320 to 1440 pixels wide.
-
 ## Credits
 
 - Music: **The Five-Floor Goodbye**, by **Ryan Ike**, from the **Gunpoint** soundtrack.
 - Fonts: **Caveat** and **Special Elite**. Their license files are included in `assets/fonts/`.
-- Project: **Diogo Gomes** — [Escuridao9](https://github.com/Escuridao9).
-
