@@ -114,10 +114,6 @@ h1 em {
   font-style: normal;
   display: inline-block;
   transform: rotate(-2deg);
-  text-decoration: underline;
-  text-decoration-style: wavy;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 6px;
 }
 
 button,
@@ -679,26 +675,11 @@ input:focus-visible {
 }
 
 .bureau-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   flex-shrink: 0;
   width: 68px;
   height: 69px;
-  background: var(--gold);
-  color: var(--desk-deep);
-  border: 2px solid #cbb68c;
-  border-radius: 7px 3px 10px 4px / 4px 9px 3px 7px;
-  box-shadow: 3px 4px 0 #102c2955;
-  font-family: var(--hand);
-  font-size: 2.8rem;
-  font-weight: 700;
-  letter-spacing: -0.075em;
-  transform: rotate(-5deg);
-}
-
-.bureau-mark span {
-  transform: translateY(4px);
+  object-fit: contain;
 }
 .identity .eyebrow {
   color: var(--muted);
@@ -2108,7 +2089,6 @@ kbd {
   .bureau-mark {
     width: 52px;
     height: 55px;
-    font-size: 2.2rem;
   }
   .identity .eyebrow {
     max-width: 260px;
