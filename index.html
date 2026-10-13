@@ -156,9 +156,10 @@
               </div>
             </div>
             <div class="shift-metrics">
-              <div>
-                <span class="metric-label">Office date</span>
-                <strong id="office-date">—</strong>
+              <div class="office-calendar">
+                <span class="metric-label">Today at the Bureau</span>
+                <time id="office-date">—</time>
+                <span id="office-date-hint" class="office-date-hint">Use for expiry checks.</span>
               </div>
               <div>
                 <span class="metric-label">Campaign points</span>
@@ -199,8 +200,11 @@
                   <div class="rulebook-footnote">
                     <span class="small-cross" aria-hidden="true">+</span>
                     <p>
-                      Every regulation must be met.<br />An expiry date includes
-                      that day.
+                      Every regulation must be met.<br />
+                      <span id="expiry-reminder">
+                        Use <time id="rulebook-date"></time> for expiry checks.
+                        Expires today? Still valid.
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -374,6 +378,13 @@
 
       <h2 id="briefing-title"></h2>
       <p id="briefing-body" class="dialog-lead"></p>
+
+      <p class="briefing-date-note">
+        <strong>Today at the Bureau:</strong> <time id="briefing-date"></time>
+        <span id="briefing-expiry-hint">
+          Check certificates against this date. An expiry date includes that day.
+        </span>
+      </p>
 
       <div class="briefing-instructions">
         <p>
@@ -795,6 +806,11 @@
         <li>
           Compare every regulated field with the rulebook. An applicant's
           statement is flavour, not evidence.
+        </li>
+        <li>
+          Check certificate expiry dates against Today at the Bureau, on the
+          paper calendar above your desk. A certificate expiring that day is
+          still valid.
         </li>
         <li>
           Approve applications that meet every rule. Reject the others and

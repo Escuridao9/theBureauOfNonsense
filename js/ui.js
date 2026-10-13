@@ -296,6 +296,18 @@ export function createInterface(definition) {
     for (const card of cards) list.appendChild(card);
   }
 
+  function renderOfficeDate(shift) {
+    const date = formatDate(shift.date);
+    const checksExpiry = shift.rules.some((rule) => rule.type === "dateNotBefore");
+    for (const id of ["office-date", "rulebook-date", "briefing-date"]) {
+      text(id, date);
+      element(id).dateTime = shift.date;
+    }
+    text("office-date-hint", checksExpiry ? "Use for expiry checks." : "Date of this shift.");
+    element("expiry-reminder").hidden = !checksExpiry;
+    element("briefing-expiry-hint").hidden = !checksExpiry;
+  }
+
   function renderDocument(shift, application) {
     text("form-number", `FORM ${shift.form}`);
     text("application-title", shift.permit);
@@ -391,7 +403,6 @@ export function createInterface(definition) {
     element("desk-layout").hidden = false;
     text("shift-number", `SHIFT ${pad(view.shiftIndex + 1)}`);
     text("department-name", view.shift.name);
-    text("office-date", formatDate(view.shift.date));
     text("score", String(view.totals.points).padStart(3, "0"));
     text("mode-name", view.modeDetails.name);
     text("clerk-name", view.clerk);
@@ -409,6 +420,7 @@ export function createInterface(definition) {
     const shiftKey = `${view.runId}/${view.shiftIndex}`;
     const applicationKey = `${shiftKey}/${view.caseIndex}`;
     if (renderedShift !== shiftKey) {
+      renderOfficeDate(view.shift);
       text("rulebook-intro", view.shift.intro);
       text("shift-memo", view.shift.memo);
       renderRules(view.shift);

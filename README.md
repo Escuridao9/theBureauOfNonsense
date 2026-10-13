@@ -25,6 +25,7 @@ Use a web server because the game loads JavaScript modules and a local JSON file
 - A start menu with New Campaign, Continue Campaign, Roll of Honour and Settings.
 - Three campaign modes and an optional clerk name.
 - Department-specific regulations and randomized application queues.
+- A paper calendar marked Today at the Bureau, with expiry reminders in the briefing and rulebook.
 - Cartoon identification portraits for all 24 applicants, with initials as a fallback.
 - Approval stamps and rejection forms with selectable regulations.
 - Audit receipts explaining decisions and points awarded.
@@ -53,12 +54,14 @@ In Never-ending Paperwork, incomplete rejection reasons cost the bonus but do no
 ## How to play
 
 1. Choose **New Campaign**, select a mode and enter a clerk name if desired.
-2. Read the department briefing and begin the shift.
+2. Read the department briefing, note the Today at the Bureau date, and begin the shift.
 3. Compare the application's fields with every regulation in the rulebook.
 4. Approve the request if every rule is met. Otherwise, reject it and select every broken regulation.
 5. Read the audit receipt, continue through the queue and review the shift report.
 
 The Main menu pauses the timer in Under Pressure. The rejection form, Settings and the handbook leave it running.
+
+Use the date on the Bureau calendar when checking certificate expiry dates. A certificate expiring on that date is still valid. The calendar updates for each department, and expiry reminders appear in departments with certificate rules.
 
 Confirming a verdict records it immediately and stops its decision clock. The stamp then lands and lifts away before the audit receipt opens. Leaving the desk cancels the animation; continuing the campaign restores the filed verdict without replaying the sound. Reduced-motion preferences show the ink and receipt immediately.
 

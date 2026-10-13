@@ -738,6 +738,7 @@ input:focus-visible {
 }
 .shift-metrics {
   display: flex;
+  align-items: center;
   gap: 28px;
 }
 .shift-metrics > div {
@@ -757,6 +758,80 @@ input:focus-visible {
   font-weight: 400;
   line-height: 1.5;
   white-space: nowrap;
+}
+
+.office-calendar {
+  position: relative;
+  padding: 11px 15px 10px;
+  min-width: 180px;
+  color: var(--ink);
+  background: var(--gold);
+  border: 1px solid #cbb58c;
+  border-radius: 3px 5px 2px 4px;
+  box-shadow: 2px 3px 0 #17332d70;
+  transform: rotate(1deg);
+}
+
+.office-calendar::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 15px;
+  right: 15px;
+  height: 6px;
+  background:
+    radial-gradient(circle at 20% 50%, var(--desk) 2px, transparent 2.5px),
+    radial-gradient(circle at 80% 50%, var(--desk) 2px, transparent 2.5px);
+}
+
+.office-calendar .metric-label {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.office-calendar time {
+  font-family: var(--hand);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.office-date-hint {
+  margin-top: 4px;
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.rulebook-footnote time {
+  color: var(--pen);
+  font-weight: 700;
+}
+
+.briefing-date-note {
+  margin-top: 18px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--amber-ink);
+  background: #f0d3a14d;
+  font-size: 0.875rem;
+}
+
+.briefing-date-note time {
+  color: var(--pen);
+  font-family: var(--hand);
+  font-size: 1.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.briefing-date-note span {
+  display: block;
+  margin-top: 3px;
+  line-height: 1.4;
 }
 
 .run-strip {
@@ -2207,9 +2282,6 @@ kbd {
   .shift-metrics {
     gap: 18px;
   }
-  .shift-metrics > div:first-child {
-    display: none;
-  }
   .shift-metrics strong {
     font-size: 0.875rem;
   }
@@ -2387,6 +2459,7 @@ kbd {
   }
   .shift-metrics {
     width: 100%;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 12px;
   }
@@ -2394,8 +2467,18 @@ kbd {
     min-width: 0;
     flex: 1;
   }
-  .shift-metrics > div:first-child {
-    display: flex;
+  .shift-metrics > .office-calendar {
+    flex: 0 0 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+  }
+  .office-calendar .metric-label {
+    flex-basis: 100%;
+  }
+  .office-date-hint {
+    margin-top: 0;
   }
   .shift-metrics strong {
     font-size: 0.8125rem;
