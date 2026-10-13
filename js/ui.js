@@ -1,5 +1,11 @@
-import { formatDate, formatField, calculateTotals } from "./rules.js";
+import { formatDate, formatField } from "./rules.js";
 import { getMode } from "./modes.js";
+
+const recordDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "2-digit",
+});
 
 const element = (id) => document.getElementById(id);
 const text = (id, value) => {
@@ -11,8 +17,19 @@ const pad = (value) => String(value).padStart(2, "0");
 
 export function createInterface(definition) {
   let clockCase = null;
+  let clockActive = null;
   let previousSeconds = 21;
   let applicationSlide = null;
+  let renderedShift = null;
+  let renderedApplication = null;
+  const clock = {
+    decision: element("decision-clock"),
+    rejection: element("rejection-clock"),
+    seconds: element("clock-seconds"),
+    rejectionSeconds: element("rejection-seconds"),
+    progress: element("clock-progress"),
+    warning: element("clock-warning"),
+  };
   element("rulebook-panel").open =
     !window.matchMedia("(max-width: 780px)").matches;
 
@@ -40,6 +57,36 @@ export function createInterface(definition) {
     container.replaceChildren(...items);
   }
 
+  function getFeedbackPresentation(view) {
+    const result = view.lastResult;
+    let stamp;
+    let label;
+    let title;
+
+    if (result.timedOut) {
+      stamp = "TIME EXPIRED";
+      label = "No decision filed";
+      title = "The deadline has passed.";
+    } else if (result.perfect) {
+      stamp = "IN ORDER";
+      label = "Decision correct";
+      title = result.decision === "approve"
+        ? "Authorisation granted."
+        : "Refusal justified.";
+    } else if (result.correctDecision) {
+      stamp = "CORRECTION";
+      label = "Decision correct";
+      title = "The reasons need work.";
+    } else {
+      stamp = "AUDIT FAILED";
+      label = "Incorrect decision";
+      title = "The audit found a problem.";
+    }
+
+    if (view.runEnded) title = "Third warning. Run closed.";
+    return { stamp, label, title };
+  }
+
   function renderFeedback(view) {
     const result = view.lastResult;
     const dialog = element("feedback-dialog");
@@ -52,40 +99,10 @@ export function createInterface(definition) {
 
     text("feedback-reference", `REF. ${result.caseId}`);
 
-    text(
-      "feedback-stamp",
-      result.timedOut
-        ? "TIME EXPIRED"
-        : result.perfect
-          ? "IN ORDER"
-          : result.correctDecision
-            ? "CORRECTION"
-            : "AUDIT FAILED",
-    );
-
-    text(
-      "feedback-label",
-      result.timedOut
-        ? "No decision filed"
-        : result.correctDecision
-          ? "Decision correct"
-          : "Incorrect decision",
-    );
-
-    text(
-      "feedback-title",
-      view.runEnded
-        ? "Third warning. Run closed."
-        : result.timedOut
-          ? "The deadline has passed."
-          : result.perfect
-            ? result.decision === "approve"
-              ? "Authorisation granted."
-              : "Refusal justified."
-            : result.correctDecision
-              ? "The reasons need work."
-              : "The audit found a problem.",
-    );
+    const presentation = getFeedbackPresentation(view);
+    text("feedback-stamp", presentation.stamp);
+    text("feedback-label", presentation.label);
+    text("feedback-title", presentation.title);
 
     let message;
 
@@ -150,10 +167,32 @@ export function createInterface(definition) {
     element("audit-list").replaceChildren(...items);
   }
 
+  function getReportTitle(view, totals) {
+    if (view.phase !== "complete") return "The desk is clear.";
+    if (view.modeDetails.endless) return "The stamp must rest.";
+    return totals.perfect === totals.count
+      ? "You may keep the stamp."
+      : "Your paperwork is on record.";
+  }
+
+  function getReportMessage(view, totals, savingAvailable) {
+    if (view.phase !== "complete") {
+      return `You processed ${totals.count} applications for the ${view.shift.name}. Review the paper trail before your next assignment.`;
+    }
+
+    const message = view.modeDetails.endless
+      ? `You filed ${totals.count} applications across ${view.shiftIndex + 1} shifts before the third wrong verdict closed your appointment.`
+      : `Three departments. Eighteen applications. An entirely unreasonable amount of responsibility. Your ${view.modeDetails.name} campaign is complete.`;
+
+    return message + (savingAvailable
+      ? " Your run is on file in the Roll of Honour."
+      : " Your record is available for this visit; saving was unavailable.");
+  }
+
   function renderReport(view, savingAvailable) {
     const finished = view.phase === "complete";
     const records = finished ? view.results : view.shiftResults;
-    const totals = calculateTotals(records);
+    const totals = finished ? view.totals : view.shiftTotals;
     text(
       "report-code",
       finished ? "RUN COMPLETE" : `SHIFT ${pad(view.shiftIndex + 1)}`,
@@ -162,22 +201,8 @@ export function createInterface(definition) {
       "report-label",
       `${view.modeDetails.name} / ${finished ? "Final assessment" : "End-of-shift assessment"}`,
     );
-    text(
-      "report-title",
-      finished
-        ? view.modeDetails.endless
-          ? "The stamp must rest."
-          : totals.perfect === totals.count
-            ? "You may keep the stamp."
-            : "Your paperwork is on record."
-        : "The desk is clear.",
-    );
-    text(
-      "report-message",
-      finished
-        ? `${view.modeDetails.endless ? `You filed ${totals.count} applications across ${view.shiftIndex + 1} shifts before the third wrong verdict closed your appointment.` : `Three departments. Eighteen applications. An entirely unreasonable amount of responsibility. Your ${view.modeDetails.name} campaign is complete.`}${savingAvailable ? " Your run is on file in the Roll of Honour." : " Your record is available for this visit; saving was unavailable."}`
-        : `You processed ${totals.count} applications for the ${view.shift.name}. Review the paper trail before your next assignment.`,
-    );
+    text("report-title", getReportTitle(view, totals));
+    text("report-message", getReportMessage(view, totals, savingAvailable));
     text(
       "report-score",
       finished && view.modeDetails.endless
@@ -292,7 +317,12 @@ export function createInterface(definition) {
     element("queue").replaceChildren(...items);
   }
 
-  function render(view, bestScore, savingAvailable) {
+  function render(
+    view,
+    bestScore,
+    savingAvailable,
+    remaining = view.timer?.remainingMs ?? null,
+  ) {
     cancelApplicationSlide();
     element("game").setAttribute("aria-busy", "false");
     element("loading-state").hidden = true;
@@ -322,22 +352,27 @@ export function createInterface(definition) {
       "best-score",
       bestScore === null ? "—" : String(bestScore).padStart(3, "0"),
     );
-    text("rulebook-intro", view.shift.intro);
-    text("shift-memo", view.shift.memo);
-    renderRules(view.shift);
-    renderDocument(view.shift, view.application);
+    const shiftKey = `${view.runId}/${view.shiftIndex}`;
+    const applicationKey = `${shiftKey}/${view.caseIndex}`;
+    if (renderedShift !== shiftKey) {
+      text("rulebook-intro", view.shift.intro);
+      text("shift-memo", view.shift.memo);
+      renderRules(view.shift);
+      renderedShift = shiftKey;
+    }
+    if (renderedApplication !== applicationKey) {
+      renderDocument(view.shift, view.application);
+      renderedApplication = applicationKey;
+    }
     renderQueue(view);
     const inspecting = view.phase === "inspection";
 
-    const nextClockCase = `${view.runId}/${view.shiftIndex}/${view.caseIndex}`;
-    if (clockCase !== nextClockCase) {
-      clockCase = nextClockCase;
+    if (clockCase !== applicationKey) {
+      clockCase = applicationKey;
       previousSeconds = 21;
-      text("clock-warning", "");
+      clock.warning.textContent = "";
     }
-    renderClock(
-      view.modeDetails.timed && inspecting ? view.timer.remainingMs : null,
-    );
+    renderClock(view.modeDetails.timed && inspecting ? remaining : null);
     element("approve-button").disabled = !inspecting;
     element("reject-button").disabled = !inspecting;
 
@@ -384,21 +419,26 @@ export function createInterface(definition) {
 
   function renderClock(remaining) {
     const active = remaining !== null;
-    element("decision-clock").hidden = !active;
-    element("rejection-clock").hidden = !active;
+    if (clockActive !== active) {
+      clock.decision.hidden = !active;
+      clock.rejection.hidden = !active;
+      clockActive = active;
+    }
     if (!active) return;
-    const seconds = Math.ceil(Math.max(0, remaining) / 1000);
-    text("clock-seconds", seconds);
-    text("rejection-seconds", seconds);
-    element("clock-progress").value = Math.max(0, remaining) / 1000;
-    element("clock-progress").setAttribute(
-      "aria-valuetext",
-      `${seconds} seconds remaining`,
-    );
-    element("decision-clock").classList.toggle("urgent", seconds <= 5);
-    element("rejection-clock").classList.toggle("urgent", seconds <= 5);
-    if (seconds <= 5 && seconds > 0 && previousSeconds > 5)
-      text("clock-warning", `${seconds} seconds left to file this decision.`);
+
+    const secondsRemaining = Math.max(0, remaining) / 1000;
+    const seconds = Math.ceil(secondsRemaining);
+    clock.progress.value = secondsRemaining;
+    if (seconds === previousSeconds) return;
+
+    clock.seconds.textContent = seconds;
+    clock.rejectionSeconds.textContent = seconds;
+    clock.progress.setAttribute("aria-valuetext", `${seconds} seconds remaining`);
+    clock.decision.classList.toggle("urgent", seconds <= 5);
+    clock.rejection.classList.toggle("urgent", seconds <= 5);
+    if (seconds <= 5 && seconds > 0 && previousSeconds > 5) {
+      clock.warning.textContent = `${seconds} seconds left to file this decision.`;
+    }
     previousSeconds = seconds;
   }
 
@@ -423,11 +463,7 @@ export function createInterface(definition) {
       row.querySelector(".record-date").textContent =
         record.endedAt === null
           ? "—"
-          : new Intl.DateTimeFormat("en-GB", {
-              day: "numeric",
-              month: "short",
-              year: "2-digit",
-            }).format(new Date(record.endedAt));
+          : recordDateFormatter.format(new Date(record.endedAt));
       return row;
     });
     element("records-body").replaceChildren(...rows);

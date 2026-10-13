@@ -2467,26 +2467,7 @@ kbd {
   .decision-hint {
     font-size: 0.75rem;
   }
-}
-@media (max-width: 360px) {
-  .stamp-button {
-    font-size: 1.4rem;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
 
-  .explanation {
-    gap: 10px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .feedback-dialog[open] .feedback-stamp {
-    animation: none;
-  }
-}
-
-@media (max-width: 500px) {
   .bureau-dialog {
     padding: 24px;
     width: calc(100% - 24px);
@@ -2525,66 +2506,7 @@ kbd {
   .dialog-topline {
     font-size: 0.625rem;
   }
-}
-@media (max-width: 360px) {
-  .identity h1 {
-    font-size: 1.9rem;
-  }
-  .application-fields {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .document-field:nth-child(even) {
-    padding-left: 0;
-    border-left: 0;
-  }
-  .application-heading h2 {
-    font-size: 2rem;
-  }
-  .queue-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .queue-item:nth-last-child(2) {
-    border-bottom: 1px dashed #afbaa7;
-  }
-  .dialog-actions {
-    flex-direction: column;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition: none !important;
-    animation: none !important;
-  }
-}
-@media print {
-  body {
-    background: white;
-    color: black;
-  }
-  .bureau-header,
-  .shift-bar,
-  .rulebook,
-  .in-tray,
-  .decision-controls,
-  .decision-hint,
-  .bureau-footer,
-  dialog {
-    display: none;
-  }
-  .desk-layout {
-    display: block;
-  }
-  .bureau-shell {
-    padding: 0;
-  }
-  .application-paper {
-    box-shadow: none;
-  }
-}
-@media (max-width: 500px) {
+
   .mode-dialog,
   .honours-dialog {
     width: calc(100% - 24px);
@@ -2609,5 +2531,80 @@ kbd {
   .run-strip {
     font-size: 1.15rem;
     gap: 7px;
+  }
+}
+
+@media (max-width: 360px) {
+  .stamp-button {
+    font-size: 1.4rem;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .explanation {
+    gap: 10px;
+  }
+
+  .identity h1 {
+    font-size: 1.9rem;
+  }
+  .application-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .document-field:nth-child(even) {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .application-heading h2 {
+    font-size: 2rem;
+  }
+  .queue-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .queue-item:nth-last-child(2) {
+    border-bottom: 1px dashed #afbaa7;
+  }
+  .dialog-actions {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback-dialog[open] .feedback-stamp {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  .bureau-header,
+  .shift-bar,
+  .rulebook,
+  .in-tray,
+  .decision-controls,
+  .decision-hint,
+  .bureau-footer,
+  dialog {
+    display: none;
+  }
+  .desk-layout {
+    display: block;
+  }
+  .bureau-shell {
+    padding: 0;
+  }
+  .application-paper {
+    box-shadow: none;
   }
 }

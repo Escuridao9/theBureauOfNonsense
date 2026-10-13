@@ -1,3 +1,11 @@
+const numberFormatter = new Intl.NumberFormat("en-GB");
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 export function normalizeText(value) {
   return String(value).trim().toLowerCase();
 }
@@ -5,12 +13,7 @@ export function normalizeText(value) {
 export function formatDate(value) {
   const date = new Date(`${value}T00:00:00Z`);
 
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
+  return dateFormatter.format(date);
 }
 
 export function formatField(value, field) {
@@ -18,7 +21,7 @@ export function formatField(value, field) {
     case "date":
       return formatDate(value);
     case "number":
-      return `${new Intl.NumberFormat("en-GB").format(value)} ${field.unit}`;
+      return `${numberFormatter.format(value)} ${field.unit}`;
     case "list":
       return value.join(" + ");
     case "boolean":
@@ -45,8 +48,8 @@ export function checkRule(rule, application, officeDate) {
     case "maxNumber":
       passed = Number.isFinite(value) && value >= 0 && value <= rule.maximum;
       explanation =
-        `${rule.fieldLabel} is ${new Intl.NumberFormat("en-GB").format(value)} ${rule.unit}; ` +
-        `the limit is ${new Intl.NumberFormat("en-GB").format(rule.maximum)} ${rule.unit}.`;
+        `${rule.fieldLabel} is ${numberFormatter.format(value)} ${rule.unit}; ` +
+        `the limit is ${numberFormatter.format(rule.maximum)} ${rule.unit}.`;
       break;
 
     case "contains":

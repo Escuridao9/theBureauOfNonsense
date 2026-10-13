@@ -10,7 +10,7 @@
       "date": "1984-10-07",
       "intro": "Rooftops are not a public right. Even for creatures who can fly.",
       "memo": "Being able to land somewhere does not constitute permission to land there.",
-      "briefingTitle": "Welcome to the fourth floor.",
+      "briefingTitle": "Welcome to the fifth floor.",
       "briefing": "Your first assignment is rooftop parking. Expect large vehicles, larger egos, and fireproofing certificates. The regulations are on your left. Please familiarise yourself with them before anything lands.",
       "fields": [
         {
@@ -65,7 +65,7 @@
           "id": "RP-101",
           "name": "Aurelia Cinder",
           "species": "Dragon / independent contractor",
-          "quote": "The roof was there. I was there. It seemed an excellent arrangement.",
+          "quote": "The roof is still the ground. It has simply been promoted.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 1840,
@@ -77,7 +77,7 @@
           "id": "RP-102",
           "name": "Percival Drift",
           "species": "Cloud whale / occasional commuter",
-          "quote": "I weighed myself before breakfast. Clouds do not have especially heavy breakfasts.",
+          "quote": "I travelled light. Most of my luggage evaporated.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 2000,
@@ -89,7 +89,7 @@
           "id": "RP-103",
           "name": "Matilda Brass",
           "species": "Steam-powered carriage / self-employed",
-          "quote": "The chimney is a decorative feature. Mostly.",
+          "quote": "The chimney is decorative. The smoke is performance art.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 2100,
@@ -101,7 +101,7 @@
           "id": "RP-104",
           "name": "Orson Featherwick",
           "species": "Giant owl / night courier",
-          "quote": "I promise to leave no feathers. I cannot speak for my passengers.",
+          "quote": "Apparently, turning my head backwards still doesn't count as checking my mirrors.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 380,
@@ -113,7 +113,7 @@
           "id": "RP-105",
           "name": "Beatrice Hush",
           "species": "Flying armchair / retired",
-          "quote": "The view is quite lovely, and the lift does not accommodate my upholstery.",
+          "quote": "After forty years of supporting people, I'd like the building to return the favour.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 86,
@@ -125,7 +125,7 @@
           "id": "RP-106",
           "name": "Felix Ember",
           "species": "Dragon / chimney inspector",
-          "quote": "I inspect chimneys. Naturally, I should be near one.",
+          "quote": "I used to be blamed for chimney fires. Now I charge an inspection fee.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 1720,
@@ -137,7 +137,7 @@
           "id": "RP-107",
           "name": "Hector Bellweather",
           "species": "Weather balloon / licensed observer",
-          "quote": "I am considerably lighter when nobody is looking.",
+          "quote": "Most of that weight is air. I assumed public property didn't need declaring.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 2600,
@@ -149,7 +149,7 @@
           "id": "RP-108",
           "name": "Juniper Vale",
           "species": "Witch / travelling librarian",
-          "quote": "The books weigh more than the broom, but I have declared both.",
+          "quote": "I declared the broom and the books. The cat refuses to be itemised.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 124,
@@ -222,7 +222,7 @@
           "id": "TT-201",
           "name": "Edmund Elsewhere",
           "species": "Wizard / visiting lecturer",
-          "quote": "The lecture begins in three minutes. I was meant to leave yesterday.",
+          "quote": "The lecture starts in three minutes. My explanation for being late runs to forty.",
           "fields": {
             "destination": "Old Town",
             "luggage": 28,
@@ -270,7 +270,7 @@
           "id": "TT-205",
           "name": "Basil Yesterday",
           "species": "Time traveller / chronically late",
-          "quote": "My certificate was valid at the time I completed the application.",
+          "quote": "I renewed it next Tuesday. Your records appear to be running rather behind.",
           "fields": {
             "destination": "Old Town",
             "luggage": 5,
@@ -282,7 +282,7 @@
           "id": "TT-206",
           "name": "Clementine Fold",
           "species": "Origami courier / express delivery",
-          "quote": "I have folded my suitcase to meet your requirements.",
+          "quote": "I don't bend the rules. I fold them neatly into a swan.",
           "fields": {
             "destination": "Railway Station",
             "luggage": 3,
@@ -294,7 +294,7 @@
           "id": "TT-207",
           "name": "Dorian Approximate",
           "species": "Human / amateur geographer",
-          "quote": "The Oldest Town must surely be older than Old Town. It should qualify.",
+          "quote": "Oldest Town should qualify before Old Town. It's clearly been waiting longer.",
           "fields": {
             "destination": "Oldest Town",
             "luggage": 45,
@@ -306,7 +306,7 @@
           "id": "TT-208",
           "name": "Rosalind Finch",
           "species": "Sorcerer / weekend visitor",
-          "quote": "Please ensure the pigeons do not arrive with me this time.",
+          "quote": "The pigeons are not luggage. They're just extremely committed to seeing me off.",
           "fields": {
             "destination": "Post Office",
             "luggage": 39.5,
@@ -396,7 +396,7 @@
           "id": "RH-301",
           "name": "Agnes Rattle",
           "species": "Ghost / former librarian",
-          "quote": "I shall haunt in a whisper. The books deserve a quiet evening.",
+          "quote": "I still collect overdue fines. Being dead is no excuse. I would know.",
           "fields": {
             "startTime": "23:00",
             "noise": 18,
@@ -420,7 +420,7 @@
           "id": "RH-303",
           "name": "Lydia Dawn",
           "species": "Ghost / early riser",
-          "quote": "The morning light is simply better for appearing in mirrors.",
+          "quote": "I offer wake-up calls. The call is a scream, but the principle is the same.",
           "fields": {
             "startTime": "06:00",
             "noise": 12,
@@ -444,7 +444,7 @@
           "id": "RH-305",
           "name": "Eveline Still",
           "species": "Ghost / punctual professional",
-          "quote": "I have written down the exact limits. I intend to meet them.",
+          "quote": "I stop haunting at sixty minutes. Any lingering dread is the owner's responsibility.",
           "fields": {
             "startTime": "05:00",
             "noise": 30,
@@ -468,7 +468,7 @@
           "id": "RH-307",
           "name": "Cora Candlewick",
           "species": "Ghost / candle enthusiast",
-          "quote": "I will extinguish the candles before I leave. I am not unreasonable.",
+          "quote": "They asked me to stop blowing out the candles. I suggested they stop lighting them.",
           "fields": {
             "startTime": "22:00",
             "noise": 8,
@@ -480,7 +480,7 @@
           "id": "RH-308",
           "name": "Ambrose Excess",
           "species": "Poltergeist / enthusiastic newcomer",
-          "quote": "If one rattling cupboard is unsettling, imagine twelve.",
+          "quote": "I tried a subtle haunting. Nobody complained, so I assumed it wasn't working.",
           "fields": {
             "startTime": "21:59",
             "noise": 52,

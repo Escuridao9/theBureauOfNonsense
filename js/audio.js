@@ -8,16 +8,22 @@ const CHANNELS = Object.keys(DEFAULTS);
 
 const LOOPS = ["atmosphere", "music"];
 
+export function getAudioChannelIds() {
+  return [...CHANNELS];
+}
+
+function normalizeVolume(value, fallback) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.round(Math.min(100, Math.max(0, value)))
+    : fallback;
+}
+
 export function normalizeAudioSettings(value) {
-  const masterVolume = value?.masterVolume;
 
   return {
     masterEnabled:
       typeof value?.masterEnabled === "boolean" ? value.masterEnabled : true,
-    masterVolume:
-      typeof masterVolume === "number" && Number.isFinite(masterVolume)
-        ? Math.round(Math.min(100, Math.max(0, masterVolume)))
-        : 100,
+    masterVolume: normalizeVolume(value?.masterVolume, 100),
     ...Object.fromEntries(
       CHANNELS.map((channel) => {
         const saved = value?.[channel];
@@ -30,10 +36,7 @@ export function normalizeAudioSettings(value) {
               typeof saved?.enabled === "boolean"
                 ? saved.enabled
                 : defaults.enabled,
-            volume:
-              typeof saved?.volume === "number" && Number.isFinite(saved.volume)
-                ? Math.round(Math.min(100, Math.max(0, saved.volume)))
-                : defaults.volume,
+            volume: normalizeVolume(saved?.volume, defaults.volume),
           },
         ];
       }),
@@ -90,26 +93,23 @@ export function createAudioController(
     } catch {}
   }
 
-  function setChannel(channel, changes) {
-    if (!CHANNELS.includes(channel)) return;
-    settings = normalizeAudioSettings({
-      ...settings,
-      [channel]: { ...settings[channel], ...changes },
-    });
+  function updateSettings(changes) {
+    settings = normalizeAudioSettings({ ...settings, ...changes });
     apply();
     onChange(getSettings());
+  }
+
+  function setChannel(channel, changes) {
+    if (!CHANNELS.includes(channel)) return;
+    updateSettings({ [channel]: { ...settings[channel], ...changes } });
   }
 
   function setMasterVolume(volume) {
-    settings = normalizeAudioSettings({ ...settings, masterVolume: volume });
-    apply();
-    onChange(getSettings());
+    updateSettings({ masterVolume: volume });
   }
 
   function setMasterEnabled(enabled) {
-    settings = normalizeAudioSettings({ ...settings, masterEnabled: enabled });
-    apply();
-    onChange(getSettings());
+    updateSettings({ masterEnabled: enabled });
   }
 
   for (const player of Object.values(players)) {

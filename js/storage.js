@@ -1,4 +1,6 @@
-import { getMode, normalizeClerk } from "./modes.js";
+import { getMode, getModeIds, normalizeClerk } from "./modes.js";
+
+const RECORD_LIMIT = 10;
 
 const STORAGE_PREFIX = "bureau-of-nonsense:";
 const PROGRESS_KEY = "bureau-of-nonsense:progress:v1";
@@ -13,6 +15,15 @@ function rankRecords(records) {
       (second.correct ?? -1) - (first.correct ?? -1) ||
       (first.mistakes ?? Infinity) - (second.mistakes ?? Infinity) ||
       (Date.parse(second.endedAt) || 0) - (Date.parse(first.endedAt) || 0),
+  );
+}
+
+function limitRecords(records) {
+  return getModeIds().flatMap((mode) =>
+    rankRecords(records.filter((record) => record.mode === mode)).slice(
+      0,
+      RECORD_LIMIT,
+    ),
   );
 }
 
@@ -149,12 +160,7 @@ export function createStorage(getProvider = () => window.localStorage) {
         }),
       );
     }
-    records = ["normal", "hard", "endless"].flatMap((mode) =>
-      rankRecords(records.filter((record) => record.mode === mode)).slice(
-        0,
-        10,
-      ),
-    );
+    records = limitRecords(records);
     const seen = Array.isArray(saved?.seen)
       ? saved.seen
           .filter(
@@ -171,14 +177,17 @@ export function createStorage(getProvider = () => window.localStorage) {
     };
     return ledger;
   }
-  function loadRecords(mode = "normal") {
+  function getRecordsForMode(mode) {
     getMode(mode);
-    return structuredClone(
-      rankRecords(getLedger().records.filter((record) => record.mode === mode)),
+    return rankRecords(
+      getLedger().records.filter((record) => record.mode === mode),
     );
   }
+  function loadRecords(mode = "normal") {
+    return structuredClone(getRecordsForMode(mode));
+  }
   function loadBest(mode = "normal") {
-    return loadRecords(mode)[0]?.points ?? null;
+    return getRecordsForMode(mode)[0]?.points ?? null;
   }
   function saveBest(points) {
     const previous = previousBest();
@@ -219,9 +228,7 @@ export function createStorage(getProvider = () => window.localStorage) {
     pool.push(record);
     ledger = {
       version: 1,
-      records: ["normal", "hard", "endless"].flatMap((mode) =>
-        rankRecords(pool.filter((item) => item.mode === mode)).slice(0, 10),
-      ),
+      records: limitRecords(pool),
       seen: [...current.seen, record.runId].slice(-100),
     };
     return write(RECORDS_KEY, JSON.stringify(ledger));

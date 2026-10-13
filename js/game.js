@@ -286,8 +286,16 @@ export function createCampaign(
     currentShift().applications.find(
       (item) => item.id === state.queues[state.shiftIndex][state.caseIndex],
     );
-  const mistakes = () =>
-    state.results.filter((result) => !result.correctDecision).length;
+  let totalsResults = null;
+  let totalsCache = null;
+
+  function getCampaignTotals() {
+    if (totalsResults !== state.results) {
+      totalsResults = state.results;
+      totalsCache = calculateTotals(state.results);
+    }
+    return totalsCache;
+  }
 
   const remaining = () =>
     !state.timer
@@ -315,9 +323,10 @@ export function createCampaign(
 
   function commit(result) {
     const results = [...state.results, result];
-    const ended =
-      details.endless &&
-      results.filter((item) => !item.correctDecision).length === 3;
+    const totals = getCampaignTotals();
+    const mistakes =
+      totals.count - totals.correct + Number(!result.correctDecision);
+    const ended = details.endless && mistakes === 3;
 
     state = {
       ...state,
@@ -417,6 +426,8 @@ export function createCampaign(
 
   function getView() {
     const shift = currentShift();
+    const totals = getCampaignTotals();
+    const mistakes = totals.count - totals.correct;
     const shiftResults = state.results.slice(
       state.shiftIndex * definition.casesPerShift,
       (state.shiftIndex + 1) * definition.casesPerShift,
@@ -431,10 +442,10 @@ export function createCampaign(
       queue: state.queues[state.shiftIndex].map((id) =>
         shift.applications.find((item) => item.id === id),
       ),
-      totals: calculateTotals(state.results),
+      totals,
       shiftTotals: calculateTotals(shiftResults),
-      mistakes: mistakes(),
-      warningsLeft: details.endless ? Math.max(0, 3 - mistakes()) : null,
+      mistakes,
+      warningsLeft: details.endless ? Math.max(0, 3 - mistakes) : null,
       runEnded: Boolean(state.endedAt),
       lastResult: state.results.at(-1) ?? null,
       shiftCount: details.endless ? null : definition.shifts.length,
@@ -451,6 +462,7 @@ export function createCampaign(
     pauseClock,
     resumeClock,
     getView,
+    getPhase: () => state.phase,
     timeRemaining: () =>
       details.timed && state.phase === "inspection" ? remaining() : null,
     snapshot: () => structuredClone(state),

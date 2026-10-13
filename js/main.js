@@ -1,7 +1,7 @@
 import { createCampaign, validateDefinition } from "./game.js";
 import { createStorage } from "./storage.js";
 import { createInterface } from "./ui.js";
-import { createAudioController } from "./audio.js";
+import { createAudioController, getAudioChannelIds } from "./audio.js";
 
 const storage = createStorage();
 const element = (id) => document.getElementById(id);
@@ -29,23 +29,33 @@ const audio = createAudioController(
   },
 );
 
+function syncAudioControl(id, { enabled, volume }) {
+  element(`${id}-enabled`).checked = enabled;
+  element(`${id}-volume`).value = volume;
+  element(`${id}-volume`).setAttribute("aria-valuetext", `${volume}%`);
+  element(`${id}-volume-output`).value = `${volume}%`;
+}
+
 function syncSettings() {
-  const { masterEnabled, masterVolume, ...channels } = audio.getSettings();
-
-  element("master-enabled").checked = masterEnabled;
-  element("master-volume").value = masterVolume;
-  element("master-volume").setAttribute("aria-valuetext", `${masterVolume}%`);
-  element("master-volume-output").value = `${masterVolume}%`;
-
-  for (const [channel, preference] of Object.entries(channels)) {
-    element(`${channel}-enabled`).checked = preference.enabled;
-    element(`${channel}-volume`).value = preference.volume;
-    element(`${channel}-volume`).setAttribute(
-      "aria-valuetext",
-      `${preference.volume}%`,
-    );
-    element(`${channel}-volume-output`).value = `${preference.volume}%`;
+  const settings = audio.getSettings();
+  syncAudioControl("master", {
+    enabled: settings.masterEnabled,
+    volume: settings.masterVolume,
+  });
+  for (const channel of getAudioChannelIds()) {
+    syncAudioControl(channel, settings[channel]);
   }
+}
+
+function bindAudioControl(id, setEnabled, setVolume) {
+  element(`${id}-enabled`).addEventListener("change", (event) => {
+    setEnabled(event.target.checked);
+    syncSettings();
+  });
+  element(`${id}-volume`).addEventListener("input", (event) => {
+    setVolume(Number(event.target.value));
+    syncSettings();
+  });
 }
 
 function openSettings() {
@@ -84,6 +94,25 @@ function closeDialogs() {
     dialog.close();
 }
 
+function getCampaignStatusMessage(view) {
+  if (!view) return "No campaign on file. Your first shift awaits.";
+  if (view.phase === "complete") {
+    return `${view.modeDetails.name} run complete. A fresh stack of paperwork awaits.`;
+  }
+  if (view.runEnded) {
+    return `${view.modeDetails.name} run closed. Continue to collect your final report.`;
+  }
+
+  const shiftCount = view.shiftCount === null ? "" : ` of ${view.shiftCount}`;
+  let message = `${view.modeDetails.name} · Shift ${view.shiftIndex + 1}${shiftCount} · ${view.totals.count} applications filed · ${view.totals.points} points.`;
+  if (view.modeDetails.endless) {
+    message += ` ${view.mistakes}/3 audit warnings.`;
+  } else if (view.modeDetails.timed && view.phase === "inspection") {
+    message += ` Clock paused at ${Math.ceil(campaign.timeRemaining() / 1000)}s.`;
+  }
+  return message;
+}
+
 function renderMenu() {
   element("start-screen").hidden = false;
   element("campaign-screen").hidden = true;
@@ -99,13 +128,7 @@ function renderMenu() {
   element("menu-best-score").textContent =
     bestScore === null ? "—" : String(bestScore).padStart(3, "0");
   element("campaign-status").hidden = !ready;
-  let message = view
-    ? view.phase === "complete"
-      ? `${view.modeDetails.name} run complete. A fresh stack of paperwork awaits.`
-      : view.runEnded
-        ? `${view.modeDetails.name} run closed. Continue to collect your final report.`
-        : `${view.modeDetails.name} · Shift ${view.shiftIndex + 1}${view.shiftCount === null ? "" : ` of ${view.shiftCount}`} · ${view.totals.count} applications filed · ${view.totals.points} points.${view.modeDetails.endless ? ` ${view.mistakes}/3 audit warnings.` : view.modeDetails.timed && view.phase === "inspection" ? ` Clock paused at ${Math.ceil(campaign.timeRemaining() / 1000)}s.` : ""}`
-    : "No campaign on file. Your first shift awaits.";
+  let message = getCampaignStatusMessage(view);
   if (!storage.isAvailable())
     message += " Progress is available during this visit only.";
   element("campaign-status").textContent = message;
@@ -127,8 +150,13 @@ function refresh() {
     if (view.mode === "normal") storage.saveBest(view.totals.points);
   }
   storage.saveProgress(campaign.snapshot());
-  ui.render(view, storage.loadBest(view.mode), storage.isAvailable());
-  ui.renderClock(campaign.timeRemaining());
+  ui.render(
+    view,
+    storage.loadBest(view.mode),
+    storage.isAvailable(),
+    campaign.timeRemaining(),
+  );
+  return view;
 }
 
 function showMenu() {
@@ -155,7 +183,7 @@ function openDesk() {
   campaign.resumeClock();
   refresh();
   tickClock();
-  if (campaign.getView().phase === "inspection")
+  if (campaign.getPhase() === "inspection")
     element("application").focus({ preventScroll: true });
 }
 
@@ -208,8 +236,8 @@ function finishInspection(decision, reasons = []) {
 
 function advance() {
   if (screen !== "desk" || !campaign?.advance()) return;
-  refresh();
-  if (campaign.getView().phase === "inspection") {
+  const view = refresh();
+  if (view.phase === "inspection") {
     presentApplication();
   }
 }
@@ -240,7 +268,7 @@ function tickClock() {
 function openRejection() {
   if (screen !== "desk") return;
   tickClock();
-  if (campaign?.getView().phase !== "inspection") return;
+  if (campaign?.getPhase() !== "inspection") return;
   ui.openRejection(campaign.getView());
   ui.renderClock(campaign.timeRemaining());
 }
@@ -286,7 +314,7 @@ element("close-honours-button").addEventListener("click", () =>
   element("honours-dialog").close(),
 );
 element("continue-campaign-button").addEventListener("click", () => {
-  if (campaign && campaign.getView().phase !== "complete") openDesk();
+  if (campaign && campaign.getPhase() !== "complete") openDesk();
 });
 element("menu-button").addEventListener("click", showMenu);
 for (const button of document.querySelectorAll("[data-main-menu]"))
@@ -315,7 +343,7 @@ element("rejection-form").addEventListener("submit", (event) => {
 });
 element("next-applicant-button").addEventListener("click", advance);
 element("report-continue-button").addEventListener("click", () => {
-  if (campaign?.getView().phase === "complete") showMenu();
+  if (campaign?.getPhase() === "complete") showMenu();
   else advance();
 });
 element("help-button").addEventListener("click", () =>
@@ -369,24 +397,13 @@ element("cancel-clear-data-button").addEventListener("click", () =>
   element("clear-data-dialog").close(),
 );
 element("confirm-clear-data-button").addEventListener("click", clearSavedData);
-element("master-enabled").addEventListener("change", (event) => {
-  audio.setMasterEnabled(event.target.checked);
-  syncSettings();
-});
-element("master-volume").addEventListener("input", (event) => {
-  audio.setMasterVolume(Number(event.target.value));
-  syncSettings();
-});
-for (const channel of ["atmosphere", "music", "effects", "paper"]) {
-  element(`${channel}-enabled`).addEventListener("change", (event) => {
-    audio.setChannel(channel, { enabled: event.target.checked });
-    syncSettings();
-  });
-
-  element(`${channel}-volume`).addEventListener("input", (event) => {
-    audio.setChannel(channel, { volume: Number(event.target.value) });
-    syncSettings();
-  });
+bindAudioControl("master", audio.setMasterEnabled, audio.setMasterVolume);
+for (const channel of getAudioChannelIds()) {
+  bindAudioControl(
+    channel,
+    (enabled) => audio.setChannel(channel, { enabled }),
+    (volume) => audio.setChannel(channel, { volume }),
+  );
 }
 document.addEventListener("pointerdown", () => audio.activate());
 document.addEventListener("keydown", () => audio.activate());
@@ -406,7 +423,7 @@ document.addEventListener("keydown", (event) => {
   )
     return;
   if (element("settings-dialog").open || element("help-dialog").open) return;
-  const phase = campaign.getView().phase;
+  const phase = campaign.getPhase();
   if (
     element("feedback-dialog").open &&
     phase === "feedback" &&
