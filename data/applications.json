@@ -24,7 +24,11 @@
           "format": "number",
           "unit": "kg"
         },
-        { "key": "coverage", "label": "Authorised zones", "format": "list" },
+        {
+          "key": "coverage",
+          "label": "Authorised zones",
+          "format": "list"
+        },
         {
           "key": "fireproofing",
           "label": "Fireproofing valid until",
@@ -69,8 +73,14 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 1840,
-            "coverage": ["Ground"],
+            "coverage": [
+              "Ground"
+            ],
             "fireproofing": "1984-12-03"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 0
           }
         },
         {
@@ -81,8 +91,15 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 2000,
-            "coverage": ["Ground", "Rooftop"],
+            "coverage": [
+              "Ground",
+              "Rooftop"
+            ],
             "fireproofing": "1984-10-07"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 1
           }
         },
         {
@@ -93,8 +110,14 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 2100,
-            "coverage": ["Rooftop"],
+            "coverage": [
+              "Rooftop"
+            ],
             "fireproofing": "1984-11-20"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 2
           }
         },
         {
@@ -105,8 +128,14 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 380,
-            "coverage": ["Rooftop"],
+            "coverage": [
+              "Rooftop"
+            ],
             "fireproofing": "1984-10-06"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 3
           }
         },
         {
@@ -117,8 +146,14 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 86,
-            "coverage": ["Rooftop"],
+            "coverage": [
+              "Rooftop"
+            ],
             "fireproofing": "1985-03-12"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 4
           }
         },
         {
@@ -129,8 +164,15 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 1720,
-            "coverage": ["Ground", "Rooftop"],
+            "coverage": [
+              "Ground",
+              "Rooftop"
+            ],
             "fireproofing": "1984-10-30"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 5
           }
         },
         {
@@ -141,8 +183,14 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 2600,
-            "coverage": ["Ground"],
+            "coverage": [
+              "Ground"
+            ],
             "fireproofing": "1984-09-30"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 6
           }
         },
         {
@@ -153,8 +201,15 @@
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 124,
-            "coverage": ["Rooftop", "Ground"],
+            "coverage": [
+              "Rooftop",
+              "Ground"
+            ],
             "fireproofing": "1984-11-02"
+          },
+          "portrait": {
+            "sheet": "vehicles",
+            "slot": 7
           }
         }
       ]
@@ -186,7 +241,11 @@
           "label": "Travel certificate valid until",
           "format": "date"
         },
-        { "key": "carrier", "label": "Registered carrier", "format": "text" }
+        {
+          "key": "carrier",
+          "label": "Registered carrier",
+          "format": "text"
+        }
       ],
       "rules": [
         {
@@ -196,7 +255,11 @@
           "type": "oneOf",
           "field": "destination",
           "fieldLabel": "Requested destination",
-          "allowed": ["Old Town", "Railway Station", "Post Office"]
+          "allowed": [
+            "Old Town",
+            "Railway Station",
+            "Post Office"
+          ]
         },
         {
           "id": "TT-02",
@@ -228,6 +291,10 @@
             "luggage": 28,
             "certificate": "1984-11-01",
             "carrier": "Blink & You Miss It"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 0
           }
         },
         {
@@ -240,6 +307,10 @@
             "luggage": 40,
             "certificate": "1984-10-08",
             "carrier": "Municipal Vanishing Service"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 1
           }
         },
         {
@@ -252,6 +323,10 @@
             "luggage": 12,
             "certificate": "1984-12-21",
             "carrier": "Blink & You Miss It"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 2
           }
         },
         {
@@ -264,6 +339,10 @@
             "luggage": 92,
             "certificate": "1984-11-18",
             "carrier": "Municipal Vanishing Service"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 3
           }
         },
         {
@@ -276,6 +355,10 @@
             "luggage": 5,
             "certificate": "1984-10-07",
             "carrier": "A Moment Ago Ltd."
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 4
           }
         },
         {
@@ -288,6 +371,10 @@
             "luggage": 3,
             "certificate": "1984-10-20",
             "carrier": "Blink & You Miss It"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 5
           }
         },
         {
@@ -300,6 +387,10 @@
             "luggage": 45,
             "certificate": "1984-10-02",
             "carrier": "Almost There Transit"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 6
           }
         },
         {
@@ -312,6 +403,10 @@
             "luggage": 39.5,
             "certificate": "1985-01-01",
             "carrier": "Municipal Vanishing Service"
+          },
+          "portrait": {
+            "sheet": "travel",
+            "slot": 7
           }
         }
       ]
@@ -402,6 +497,10 @@
             "noise": 18,
             "consent": true,
             "duration": 45
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 0
           }
         },
         {
@@ -414,6 +513,10 @@
             "noise": 48,
             "consent": true,
             "duration": 30
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 1
           }
         },
         {
@@ -426,6 +529,10 @@
             "noise": 12,
             "consent": true,
             "duration": 20
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 2
           }
         },
         {
@@ -438,6 +545,10 @@
             "noise": 26,
             "consent": false,
             "duration": 50
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 3
           }
         },
         {
@@ -450,6 +561,10 @@
             "noise": 30,
             "consent": true,
             "duration": 60
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 4
           }
         },
         {
@@ -462,6 +577,10 @@
             "noise": 20,
             "consent": true,
             "duration": 75
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 5
           }
         },
         {
@@ -474,6 +593,10 @@
             "noise": 8,
             "consent": true,
             "duration": 35
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 6
           }
         },
         {
@@ -486,6 +609,10 @@
             "noise": 52,
             "consent": false,
             "duration": 90
+          },
+          "portrait": {
+            "sheet": "ghosts",
+            "slot": 7
           }
         }
       ]

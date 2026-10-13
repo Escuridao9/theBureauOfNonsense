@@ -1057,21 +1057,46 @@ details[open] > .binder-label::after {
   min-width: 0;
 }
 
-.initials {
+.applicant-photo {
   border: 2px solid #668294;
   border-radius: 7px 3px 9px 5px / 4px 8px 3px 7px;
   background: #e1e8df;
   color: var(--pen);
   display: grid;
   place-items: center;
-  width: 62px;
-  height: 66px;
+  width: 76px;
+  height: 80px;
+  padding: 4px;
   font-family: var(--hand);
   font-size: 2rem;
   font-weight: 600;
   flex-shrink: 0;
   transform: rotate(-3deg);
   box-shadow: 2px 2px 0 #b6c4bb66;
+}
+
+.photo-crop {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #adbbae;
+}
+
+.photo-crop img {
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  max-width: none;
+  display: block;
+  object-fit: fill;
+}
+
+.photo-crop span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .field-label {
@@ -1097,7 +1122,10 @@ details[open] > .binder-label::after {
 }
 
 .applicant-identity p {
-  font-size: 0.875rem;
+  font-family: var(--hand);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.2;
   color: var(--paper-muted);
 }
 
@@ -2379,9 +2407,10 @@ kbd {
   .applicant-identity h3 {
     font-size: 1.85rem;
   }
-  .initials {
-    width: 51px;
-    height: 58px;
+  .applicant-photo {
+    width: 64px;
+    height: 68px;
+    padding: 3px;
     font-size: 1.7rem;
   }
   .field-label {

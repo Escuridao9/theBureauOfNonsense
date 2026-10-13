@@ -33,6 +33,48 @@ export function createInterface(definition) {
   element("rulebook-panel").open =
     !window.matchMedia("(max-width: 780px)").matches;
 
+  const photo = element("applicant-photo");
+  const initials = element("applicant-initials");
+
+  photo.addEventListener("load", () => {
+    photo.hidden = false;
+    initials.hidden = true;
+  });
+  photo.addEventListener("error", () => {
+    photo.hidden = true;
+    initials.hidden = false;
+  });
+
+  function renderPortrait(application) {
+    const portrait = application.portrait;
+    const valid =
+      typeof portrait?.sheet === "string" &&
+      /^[a-z-]+$/.test(portrait.sheet) &&
+      Number.isInteger(portrait.slot) &&
+      portrait.slot >= 0 && portrait.slot < 8;
+
+    element("applicant-portrait").setAttribute(
+      "aria-label", `Identification for ${application.name}`,
+    );
+    initials.textContent = application.name
+      .split(" ").slice(0, 2).map((word) => word[0]).join("");
+
+    if (valid) {
+      const source = new URL(
+        `../assets/portraits/${portrait.sheet}.png`, import.meta.url,
+      ).href;
+      photo.style.left = `${-(portrait.slot % 3) * 100}%`;
+      photo.style.top = `${-Math.floor(portrait.slot / 3) * 100}%`;
+      if (photo.getAttribute("src") !== source) photo.src = source;
+    } else {
+      photo.removeAttribute("src");
+    }
+
+    const loaded = valid && photo.complete && photo.naturalWidth > 0;
+    photo.hidden = !loaded;
+    initials.hidden = loaded;
+  }
+
   function explanationsFor(result) {
     const broken = result.checks.filter((check) => !check.passed);
 
@@ -254,14 +296,7 @@ export function createInterface(definition) {
     text("application-title", shift.permit);
     text("applicant-name", application.name);
     text("applicant-species", application.species);
-    text(
-      "applicant-initials",
-      application.name
-        .split(" ")
-        .slice(0, 2)
-        .map((word) => word[0])
-        .join(""),
-    );
+    renderPortrait(application);
     text("applicant-quote", `“${application.quote}”`);
     text("application-reference", `REF. ${application.id}`);
 

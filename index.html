@@ -231,10 +231,15 @@
                   </div>
                   <div class="applicant-identity">
                     <div
-                      id="applicant-initials"
-                      class="initials"
-                      aria-hidden="true"
-                    ></div>
+                      id="applicant-portrait"
+                      class="applicant-photo"
+                      role="img"
+                    >
+                      <div class="photo-crop">
+                        <img id="applicant-photo" alt="" decoding="async" hidden />
+                        <span id="applicant-initials" aria-hidden="true"></span>
+                      </div>
+                    </div>
                     <div>
                       <span class="field-label">Applicant</span>
                       <h3 id="applicant-name"></h3>

@@ -25,6 +25,7 @@ Use a web server because the game loads JavaScript modules and a local JSON file
 - A start menu with New Campaign, Continue Campaign, Roll of Honour and Settings.
 - Three campaign modes and an optional clerk name.
 - Department-specific regulations and randomized application queues.
+- Cartoon identification portraits for all 24 applicants, with initials as a fallback.
 - Approval stamps and rejection forms with selectable regulations.
 - Audit receipts explaining decisions and points awarded.
 - Shift and final reports with an expandable paper trail.
@@ -119,3 +120,4 @@ If browser storage is unavailable, the current visit remains playable and the in
 
 - Music: **The Five-Floor Goodbye**, by **Ryan Ike**, from the **Gunpoint** soundtrack.
 - Fonts: **Caveat** and **Special Elite**. Their license files are included in `assets/fonts/`.
+- Applicant portraits: generated with OpenAI image generation. The prompts and portrait-sheet mapping are documented in `assets/portraits/PROMPTS.md`.
