@@ -20,6 +20,8 @@ export function createInterface(definition) {
   let clockActive = null;
   let previousSeconds = 21;
   let applicationSlide = null;
+  let verdictStamp = null;
+  let stampScroll = null;
   let renderedShift = null;
   let renderedApplication = null;
   const clock = {
@@ -35,6 +37,9 @@ export function createInterface(definition) {
 
   const photo = element("applicant-photo");
   const initials = element("applicant-initials");
+  const stampTool = element("stamp-tool");
+  const stampArea = element("verdict-stamp");
+  const verdictImprint = element("verdict-imprint");
 
   photo.addEventListener("load", () => {
     photo.hidden = false;
@@ -316,6 +321,15 @@ export function createInterface(definition) {
     element("application-fields").replaceChildren(...fields);
   }
 
+  function renderVerdict(result) {
+    verdictImprint.hidden = !result || result.timedOut;
+    if (verdictImprint.hidden) return;
+    element("verdict-stamp").dataset.decision = result.decision;
+    verdictImprint.textContent = result.decision === "approve"
+      ? "APPROVED"
+      : "DENIED";
+  }
+
   function renderQueue(view) {
     text("case-number", pad(view.caseIndex + 1));
     text("case-total", pad(view.queue.length));
@@ -357,8 +371,13 @@ export function createInterface(definition) {
     bestScore,
     savingAvailable,
     remaining = view.timer?.remainingMs ?? null,
+    { deferFeedback = false } = {},
   ) {
     cancelApplicationSlide();
+    cancelVerdictStamp();
+    renderVerdict(!deferFeedback && view.phase === "feedback"
+      ? view.lastResult
+      : null);
     element("game").setAttribute("aria-busy", "false");
     element("loading-state").hidden = true;
     element("error-state").hidden = true;
@@ -423,7 +442,7 @@ export function createInterface(definition) {
       openFlowDialog("briefing-dialog");
     } else if (view.phase === "feedback") {
       renderFeedback(view);
-      openFlowDialog("feedback-dialog");
+      openFlowDialog(deferFeedback ? null : "feedback-dialog");
     } else if (["shift-report", "complete"].includes(view.phase)) {
       renderReport(view, savingAvailable);
       openFlowDialog("report-dialog");
@@ -515,6 +534,79 @@ export function createInterface(definition) {
     applicationSlide = null;
   }
 
+  function cancelVerdictStamp() {
+    if (stampScroll) {
+      const { before, after } = stampScroll;
+      stampScroll = null;
+      if (Math.abs(window.scrollY - after.y) < 2 && Math.abs(window.scrollX - after.x) < 2) {
+        window.scrollTo({ left: before.x, top: before.y, behavior: "auto" });
+      }
+    }
+    if (!verdictStamp) return;
+    const stamp = verdictStamp;
+    verdictStamp = null;
+    window.clearTimeout(stamp.impactTimer);
+    stamp.motion.cancel();
+    stampTool.hidden = true;
+    stamp.resolve(false);
+  }
+
+  function stampApplication(decision, onImpact) {
+    cancelApplicationSlide();
+    cancelVerdictStamp();
+    renderVerdict({ decision, timedOut: false });
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typeof stampTool.animate !== "function"
+    ) {
+      onImpact();
+      return Promise.resolve(true);
+    }
+
+    verdictImprint.hidden = true;
+    stampTool.hidden = false;
+    const before = { x: window.scrollX, y: window.scrollY };
+    stampArea.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
+    const after = { x: window.scrollX, y: window.scrollY };
+    if (before.x !== after.x || before.y !== after.y) stampScroll = { before, after };
+    const duration = 560;
+    const impact = 0.34;
+    const motion = stampTool.animate(
+      [
+        { offset: 0, opacity: 0, transform: "translate(18px, -150px) rotate(12deg) scale(1.08)", filter: "drop-shadow(12px 20px 12px #30291f35)" },
+        { offset: 0.1, opacity: 1, transform: "translate(13px, -115px) rotate(8deg) scale(1.06)" },
+        { offset: impact, opacity: 1, transform: "translate(0, 0) rotate(-7deg) scale(1)", filter: "drop-shadow(2px 2px 1px #30291f65)" },
+        { offset: 0.44, opacity: 1, transform: "translate(0, 2px) rotate(-7deg) scale(1, 0.96)" },
+        { offset: 0.58, opacity: 1, transform: "translate(0, -3px) rotate(-7deg) scale(1)" },
+        { offset: 0.88, opacity: 1, transform: "translate(12px, -120px) rotate(8deg) scale(1.06)", filter: "drop-shadow(12px 20px 12px #30291f35)" },
+        { offset: 1, opacity: 0, transform: "translate(18px, -155px) rotate(12deg) scale(1.08)" },
+      ],
+      { duration, easing: "linear" },
+    );
+
+    return new Promise((resolve) => {
+      const stamp = { motion, resolve, impactTimer: null, impacted: false };
+      verdictStamp = stamp;
+      const press = () => {
+        if (verdictStamp !== stamp || stamp.impacted) return;
+        stamp.impacted = true;
+        verdictImprint.hidden = false;
+        onImpact();
+      };
+      stamp.impactTimer = window.setTimeout(press, duration * impact);
+      motion.finished.then(() => {
+        if (verdictStamp !== stamp) return;
+        press();
+        window.clearTimeout(stamp.impactTimer);
+        verdictStamp = null;
+        stampTool.hidden = true;
+        resolve(true);
+      }, () => {
+        if (verdictStamp === stamp) cancelVerdictStamp();
+      });
+    });
+  }
+
   function slideApplication() {
     cancelApplicationSlide();
     const paper = element("application");
@@ -547,5 +639,7 @@ export function createInterface(definition) {
     renderRecords,
     slideApplication,
     cancelApplicationSlide,
+    stampApplication,
+    cancelVerdictStamp,
   };
 }

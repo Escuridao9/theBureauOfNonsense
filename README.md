@@ -33,6 +33,7 @@ Use a web server because the game loads JavaScript modules and a local JSON file
 - Saved progress and sound preferences using `localStorage`.
 - A master volume and on/off switch, plus independent controls for music, atmosphere, stamps and paper sounds.
 - Settings closes with Done, Escape or a click outside the paper.
+- A wooden stamp animation with sound at impact and approved/denied ink on the form.
 - Sliding paper animation and reduced-motion support.
 - Responsive layouts for desktop and mobile screens.
 - A confirmed option to delete saved Bureau data.
@@ -58,6 +59,8 @@ In Never-ending Paperwork, incomplete rejection reasons cost the bonus but do no
 5. Read the audit receipt, continue through the queue and review the shift report.
 
 The Main menu pauses the timer in Under Pressure. The rejection form, Settings and the handbook leave it running.
+
+Confirming a verdict records it immediately and stops its decision clock. The stamp then lands and lifts away before the audit receipt opens. Leaving the desk cancels the animation; continuing the campaign restores the filed verdict without replaying the sound. Reduced-motion preferences show the ink and receipt immediately.
 
 | Key | Action |
 | --- | --- |

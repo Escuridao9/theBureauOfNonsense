@@ -12,6 +12,7 @@ let screen = "menu";
 let recordMode = "normal";
 let ready = false;
 let loading = false;
+let pendingStamp = null;
 
 const audio = createAudioController(
   {
@@ -59,6 +60,7 @@ function bindAudioControl(id, setEnabled, setVolume) {
 }
 
 function openSettings() {
+  revealPendingFeedback();
   syncSettings();
   element("settings-status").textContent = storage.isAvailable()
     ? "Your preferences stay with this browser."
@@ -67,6 +69,7 @@ function openSettings() {
 }
 
 function resetSessionAfterClearing() {
+  cancelPendingStamp();
   campaign = null;
   recordMode = "normal";
   ui?.cancelApplicationSlide();
@@ -134,7 +137,7 @@ function renderMenu() {
   element("campaign-status").textContent = message;
 }
 
-function refresh() {
+function refresh(options = {}) {
   if (!campaign || screen !== "desk") return;
   const view = campaign.getView();
   if (view.runEnded) {
@@ -155,11 +158,13 @@ function refresh() {
     storage.loadBest(view.mode),
     storage.isAvailable(),
     campaign.timeRemaining(),
+    options,
   );
   return view;
 }
 
 function showMenu() {
+  cancelPendingStamp();
   ui?.cancelApplicationSlide();
   if (campaign) {
     campaign.pauseClock();
@@ -225,17 +230,37 @@ async function loadCampaign() {
   }
 }
 
-function finishInspection(decision, reasons = []) {
-  if (screen !== "desk") return;
-  const result = campaign?.submit(decision, reasons);
-  if (!result) return;
-  if (!result.timedOut) audio.playStamp();
-  if (element("reject-dialog").open) element("reject-dialog").close();
+function cancelPendingStamp() {
+  pendingStamp = null;
+  ui?.cancelVerdictStamp();
+}
+
+function revealPendingFeedback() {
+  if (!pendingStamp) return;
+  cancelPendingStamp();
   refresh();
 }
 
+async function finishInspection(decision, reasons = []) {
+  if (screen !== "desk") return;
+  const result = campaign?.submit(decision, reasons);
+  if (!result) return;
+  if (element("reject-dialog").open) element("reject-dialog").close();
+  if (result.timedOut) {
+    refresh();
+    return;
+  }
+  const submittedCampaign = campaign;
+  pendingStamp = submittedCampaign;
+  refresh({ deferFeedback: true });
+  const finished = await ui.stampApplication(result.decision, audio.playStamp);
+  if (pendingStamp !== submittedCampaign) return;
+  pendingStamp = null;
+  if (finished && screen === "desk" && campaign === submittedCampaign) refresh();
+}
+
 function advance() {
-  if (screen !== "desk" || !campaign?.advance()) return;
+  if (screen !== "desk" || pendingStamp || !campaign?.advance()) return;
   const view = refresh();
   if (view.phase === "inspection") {
     presentApplication();
@@ -346,9 +371,10 @@ element("report-continue-button").addEventListener("click", () => {
   if (campaign?.getPhase() === "complete") showMenu();
   else advance();
 });
-element("help-button").addEventListener("click", () =>
-  element("help-dialog").showModal(),
-);
+element("help-button").addEventListener("click", () => {
+  revealPendingFeedback();
+  element("help-dialog").showModal();
+});
 element("close-help-button").addEventListener("click", () =>
   element("help-dialog").close(),
 );
@@ -450,6 +476,7 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden) tickClock();
 });
 window.addEventListener("pagehide", () => {
+  cancelPendingStamp();
   ui?.cancelApplicationSlide();
   if (campaign) {
     campaign.pauseClock();
@@ -459,6 +486,7 @@ window.addEventListener("pagehide", () => {
 window.addEventListener("pageshow", () => {
   if (screen === "desk" && campaign) {
     campaign.resumeClock();
+    refresh();
     tickClock();
   }
 });

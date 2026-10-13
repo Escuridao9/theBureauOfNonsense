@@ -1196,6 +1196,62 @@ details[open] > .binder-label::after {
   line-height: 1.2;
 }
 
+.verdict-stamp {
+  --verdict-ink: var(--green-ink);
+  position: relative;
+  height: 72px;
+  width: 190px;
+  max-width: 100%;
+  margin: -4px 0 8px auto;
+  scroll-margin-top: 160px;
+  scroll-margin-bottom: 116px;
+  color: var(--verdict-ink);
+  pointer-events: none;
+}
+
+.verdict-stamp[data-decision="reject"] {
+  --verdict-ink: var(--red-ink);
+}
+
+.verdict-imprint {
+  position: absolute;
+  right: 7px;
+  bottom: 12px;
+  width: 174px;
+  max-width: calc(100% - 14px);
+  padding: 9px 7px 7px;
+  border: 4px double currentColor;
+  border-radius: 5px 2px 7px 3px;
+  font-family: var(--mono);
+  font-size: 1.2rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-align: center;
+  transform: rotate(-7deg);
+  opacity: 0.88;
+  mix-blend-mode: multiply;
+  mask-image: repeating-linear-gradient(173deg, #000 0 3px, #000a 3px 4px);
+}
+
+.stamp-tool {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 19px;
+  width: 164px;
+  height: auto;
+  overflow: visible;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(2px 3px 1px #30291f60);
+}
+
+.stamp-tool svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
 .in-tray {
   min-width: 0;
   padding: 7px 0 0 3px;
@@ -2623,6 +2679,7 @@ kbd {
   .in-tray,
   .decision-controls,
   .decision-hint,
+  .stamp-tool,
   .bureau-footer,
   dialog {
     display: none;
