@@ -10,16 +10,6 @@ Its desk combines handwritten typography, paper forms, stamps and a familiar off
 
 Open the project folder in Visual Studio Code and start **Live Server** from `index.html`.
 
-Alternatively, with Python installed, open a terminal in the project folder and run:
-
-```bash
-python -m http.server 8000
-```
-
-On Windows, use `py -m http.server 8000` if the `python` command is unavailable. Visit [http://localhost:8000](http://localhost:8000).
-
-Use a web server because the game loads JavaScript modules and a local JSON file. The project runs directly in the browser and requires no build step or npm dependencies.
-
 ## Features
 
 - A start menu with New Campaign, Continue Campaign, Roll of Honour and Settings.
