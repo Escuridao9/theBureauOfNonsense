@@ -69,7 +69,7 @@
           "id": "RP-101",
           "name": "Aurelia Cinder",
           "species": "Dragon / independent contractor",
-          "quote": "The roof is still the ground. It has simply been promoted.",
+          "quote": "I don't need a reserved space. People tend to move their cars when I inhale.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 1840,
@@ -124,7 +124,7 @@
           "id": "RP-104",
           "name": "Orson Featherwick",
           "species": "Giant owl / night courier",
-          "quote": "Apparently, turning my head backwards still doesn't count as checking my mirrors.",
+          "quote": "I left the parcel in a safe place. If they can't climb a tree, that's hardly my fault.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 380,
@@ -160,7 +160,7 @@
           "id": "RP-106",
           "name": "Felix Ember",
           "species": "Dragon / chimney inspector",
-          "quote": "I used to be blamed for chimney fires. Now I charge an inspection fee.",
+          "quote": "The chimney inspection is free. Putting the fire out costs extra.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 1720,
@@ -197,7 +197,7 @@
           "id": "RP-108",
           "name": "Juniper Vale",
           "species": "Witch / travelling librarian",
-          "quote": "I declared the broom and the books. The cat refuses to be itemised.",
+          "quote": "The cat won't wear a seat belt. He says he has eight spare lives.",
           "fields": {
             "requestedZone": "Rooftop",
             "weight": 124,
@@ -285,7 +285,7 @@
           "id": "TT-201",
           "name": "Edmund Elsewhere",
           "species": "Wizard / visiting lecturer",
-          "quote": "The lecture starts in three minutes. My explanation for being late runs to forty.",
+          "quote": "My first lesson was how to disappear. Nobody came back for the second.",
           "fields": {
             "destination": "Old Town",
             "luggage": 28,
@@ -317,7 +317,7 @@
           "id": "TT-203",
           "name": "Silas Moonsworth",
           "species": "Astronomer / optimistic applicant",
-          "quote": "The Moon is technically above the town. Surely that counts.",
+          "quote": "The brochure promised peace and quiet. Having to bring my own air was in the small print.",
           "fields": {
             "destination": "Moon",
             "luggage": 12,
@@ -333,7 +333,7 @@
           "id": "TT-204",
           "name": "Viola Trunk",
           "species": "Vampire / travelling musician",
-          "quote": "The coffin is carry-on. The piano is also carry-on.",
+          "quote": "The coffin is for sleeping. The piano is for making sure nobody else does.",
           "fields": {
             "destination": "Railway Station",
             "luggage": 92,
@@ -523,7 +523,7 @@
           "id": "RH-303",
           "name": "Lydia Dawn",
           "species": "Ghost / early riser",
-          "quote": "I offer wake-up calls. The call is a scream, but the principle is the same.",
+          "quote": "I appeared beside the bed at six. They asked whether I'd brought coffee.",
           "fields": {
             "startTime": "06:00",
             "noise": 12,
@@ -587,7 +587,7 @@
           "id": "RH-307",
           "name": "Cora Candlewick",
           "species": "Ghost / candle enthusiast",
-          "quote": "They asked me to stop blowing out the candles. I suggested they stop lighting them.",
+          "quote": "They bought electric candles. I've been blowing at the plug all week.",
           "fields": {
             "startTime": "22:00",
             "noise": 8,
