@@ -71,6 +71,9 @@ function openSettings() {
 function resetSessionAfterClearing() {
   cancelPendingStamp();
   campaign = null;
+  try {
+  sessionStorage.removeItem("bureau-of-nonsense:clerk-draft");
+} catch {}
   recordMode = "normal";
   ui?.cancelApplicationSlide();
   audio.resetSettings();
@@ -275,9 +278,19 @@ function presentApplication() {
 
 function openModeChooser() {
   if (!ready) return;
+
   closeDialogs();
   element("mode-form").reset();
-  element("clerk-input").value = campaign?.getView().clerk ?? "";
+
+  let clerk = campaign?.getView().clerk ?? "";
+
+  try {
+    clerk =
+      sessionStorage.getItem("bureau-of-nonsense:clerk-draft") ??
+      clerk;
+  } catch {}
+
+  element("clerk-input").value = clerk;
   element("mode-dialog").showModal();
 }
 
@@ -501,6 +514,15 @@ window.addEventListener("storage", (event) => {
     renderMenu();
     if (element("honours-dialog").open) renderHonours();
   }
+});
+
+element("clerk-input").addEventListener("input", (event) => {
+  try {
+    sessionStorage.setItem(
+      "bureau-of-nonsense:clerk-draft",
+      event.target.value,
+    );
+  } catch {}
 });
 
 loadCampaign();
